@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { auth, getBalance, updateBalance } from '../firebase'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import PencilCoinImage from '../assets/PencilCoin.png';  // Импортируем картинку
 
 const Mining = () => {
   const [user, setUser] = useState(null);
