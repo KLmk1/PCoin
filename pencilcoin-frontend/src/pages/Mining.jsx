@@ -57,7 +57,7 @@ const Mining = () => {
             src="PencilCoin.png"  // Убедитесь, что путь правильный
             alt="Pencil Coin"
             onClick={mineCoins}
-            className="cursor-pointer w-32 h-32 mb-6 transition-transform transform hover:scale-110" 
+            className="cursor-pointer w-128 h-128 mb-6 transition-transform transform hover:scale-110" 
           />
           <p className="text-lg text-gray-600 mb-4">
             Ваш баланс: 
