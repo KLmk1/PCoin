@@ -10,9 +10,9 @@ const App = () => {
       <nav className="p-4 bg-gray-800 flex justify-between">
         <h1 className="text-xl font-bold">PencilCoin</h1>
         <div>
-          <Link to="/PCoin" className="mr-4">Home</Link>
-          <Link to="/PCoin/profile" className="mr-4">Profile</Link>
-          <Link to="/PCoin/mining">Get Coins</Link>
+          <Link to="/" className="mr-4">Home</Link>
+          <Link to="/profile" className="mr-4">Profile</Link>
+          <Link to="/mining">Get Coins</Link>
         </div>
       </nav>
       <Routes>
