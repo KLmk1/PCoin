@@ -5,5 +5,5 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(),],
-  base: '/', // Замените "mysite" на имя вашего репозитория
+  base: '/PCoin/', // Замените "mysite" на имя вашего репозитория
 })
