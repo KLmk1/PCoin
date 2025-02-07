@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://klmk1.github.io/PCoin/",
+  "homepage": "https://klmk1.github.io/",
   "scripts": {
     "start": "vite",
     "build": "vite build",

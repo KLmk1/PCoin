@@ -54,7 +54,7 @@ const Mining = () => {
           
           {/* Изображение, которое выполняет роль кнопки */}
           <img 
-            src={PencilCoinImage}  // Убедитесь, что путь правильный
+            src="PencilCoin.png"  // Убедитесь, что путь правильный
             alt="Pencil Coin"
             onClick={mineCoins}
             className="cursor-pointer w-32 h-32 mb-6 transition-transform transform hover:scale-110" 
