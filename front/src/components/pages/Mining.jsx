@@ -1,7 +1,9 @@
+// src/components/Mining.js
 import { useState, useEffect } from 'react';
-import { auth, getBalance, updateBalance } from '../../firebase'; 
+import { auth } from '../../firebase'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { getBalanceFromAPI, updateBalanceOnAPI } from '../../api/api'; // Импортируем функции
 
 const Mining = () => {
   const [user, setUser] = useState(null);
@@ -14,7 +16,7 @@ const Mining = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        const balance = await getBalance(currentUser.uid);
+        const balance = await getBalanceFromAPI(currentUser.uid);
         setBalance(balance); // Получаем реальный баланс пользователя
         setDisplayedBalance(balance); // Устанавливаем начальный баланс для отображения
       } else {
@@ -30,7 +32,7 @@ const Mining = () => {
       setAnimating(true);
 
       // Загружаем актуальный баланс один раз
-      const currentBalance = await getBalance(user.uid);
+      const currentBalance = await getBalanceFromAPI(user.uid);
 
       // Анимация увеличения баланса
       let i = 1;
@@ -40,11 +42,13 @@ const Mining = () => {
           i++;
           requestAnimationFrame(animate); // Повторяем анимацию
         } else {
-          // После завершения анимации обновляем баланс в Firebase
+          // После завершения анимации обновляем баланс на сервере
           setTimeout(async () => {
             const newBalance = currentBalance + 5; // Добавляем 5 монет
-            const updatedBalance = await updateBalance(user.uid, newBalance);
-            setBalance(updatedBalance); // Обновляем реальный баланс
+            const updatedBalance = await updateBalanceOnAPI(user.uid, newBalance);
+            if (updatedBalance !== null) {
+              setBalance(updatedBalance); // Обновляем реальный баланс
+            }
             setAnimating(false); // Останавливаем анимацию
           }, 100);
         }
