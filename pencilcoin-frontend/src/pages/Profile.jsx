@@ -28,7 +28,7 @@ const Profile = () => {
   const handleSignOut = async () => {
     try {
       await logOut();
-      navigate("/PCoin//auth"); // После выхода перенаправляем на страницу аутентификации
+      navigate("/PCoin/auth"); // После выхода перенаправляем на страницу аутентификации
     } catch (error) {
       console.error("Ошибка выхода:", error.message);
     }
