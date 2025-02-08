@@ -1,6 +1,6 @@
 // ProfilePage.js
 import { useState, useEffect } from "react";
-import { auth, logOut, getBalance } from "../firebase";
+import { auth, logOut, getBalance } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -39,13 +39,13 @@ const Profile = () => {
       {user ? (
         <div className="text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            Привет, {user.displayName}!
+              <img
+                src={user.photoURL}
+                alt="Profile"
+                className="w-18 h-18 rounded-full mb-4 inline-block mr-5"
+              />
+            {user.displayName}
           </h2>
-          <img
-            src={user.photoURL}
-            alt="Profile"
-            className="w-24 h-24 rounded-full mb-4"
-          />
           <p className="text-lg text-gray-600 mb-2">Email: {user.email}</p>
           <p className="text-lg text-gray-600 mb-4">Баланс: {balance} PencilCoins</p>
           <button

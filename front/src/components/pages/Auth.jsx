@@ -1,6 +1,6 @@
 // src/components/AuthPage.js
 import { useState, useEffect } from "react";
-import { signInWithGoogle, auth } from "../firebase";
+import { signInWithGoogle, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
