@@ -1,9 +1,7 @@
-// src/components/Mining.js
 import { useState, useEffect } from 'react';
-import { auth } from '../../firebase'; 
+import { auth, getBalance, updateBalance } from '../firebase'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { getBalanceFromAPI, updateBalanceOnAPI } from '../../api/api'; // Импортируем функции
 
 const Mining = () => {
   const [user, setUser] = useState(null);
@@ -16,7 +14,7 @@ const Mining = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        const balance = await getBalanceFromAPI(currentUser.uid);
+        const balance = await getBalance(currentUser.uid);
         setBalance(balance); // Получаем реальный баланс пользователя
         setDisplayedBalance(balance); // Устанавливаем начальный баланс для отображения
       } else {
@@ -32,29 +30,22 @@ const Mining = () => {
       setAnimating(true);
 
       // Загружаем актуальный баланс один раз
-      const currentBalance = await getBalanceFromAPI(user.uid);
-
+      const currentBalance = await getBalance(user.uid);
+      
       // Анимация увеличения баланса
-      let i = 1;
-      const animate = () => {
-        if (i <= 5) {
+      for (let i = 1; i <= 5; i++) {
+        setTimeout(() => {
           setDisplayedBalance(prev => prev + 1); // Увеличиваем отображаемый баланс
-          i++;
-          requestAnimationFrame(animate); // Повторяем анимацию
-        } else {
-          // После завершения анимации обновляем баланс на сервере
-          setTimeout(async () => {
-            const newBalance = currentBalance + 5; // Добавляем 5 монет
-            const updatedBalance = await updateBalanceOnAPI(user.uid, newBalance);
-            if (updatedBalance !== null) {
-              setBalance(updatedBalance); // Обновляем реальный баланс
-            }
-            setAnimating(false); // Останавливаем анимацию
-          }, 100);
-        }
-      };
+        }, i * 100); // Задержка на каждое увеличение
+      }
 
-      requestAnimationFrame(animate); // Начинаем анимацию
+      // Обновляем баланс в Firebase после завершения анимации
+      setTimeout(async () => {
+        const newBalance = currentBalance + 5; // Добавляем 5 монет
+        const updatedBalance = await updateBalance(user.uid, newBalance);
+        setBalance(updatedBalance); // Обновляем реальный баланс
+        setAnimating(false); // Останавливаем анимацию
+      }, 500); // Задержка для завершения анимации
     }
   };
 
@@ -69,7 +60,7 @@ const Mining = () => {
             src="PencilCoin.png"  // Убедитесь, что путь правильный
             alt="Pencil Coin"
             onClick={mineCoins}
-            className="cursor-pointer mb-6 transition-transform transform hover:scale-110 ml-auto mr-auto" 
+            className="cursor-pointer mb-6 transition-transform transform hover:scale- ml-auto mr-auto w-1/4 h-1/2" 
           />
           <p className="text-lg text-gray-600 mb-4">
             Ваш баланс: 

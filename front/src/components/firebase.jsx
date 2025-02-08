@@ -1,6 +1,7 @@
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { getFirestore} from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";  // Импортируем функции для работы с документами Firestore
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -43,40 +44,32 @@ export const logOut = async () => {
   }
 };
 
-// Функция для получения баланса пользователя
 export const getBalance = async (userId) => {
   try {
-    const userRef = doc(db, "users", userId);
-    const docSnap = await getDoc(userRef);
-
-    if (docSnap.exists()) {
-      return docSnap.data().balance;
+    const userRef = doc(db, "users", userId);  // Доступ к документу пользователя в коллекции "users"
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      return userDoc.data().balance || 0;  // Возвращаем баланс, если он существует
     } else {
-      // Если документа нет, создаем его с начальным балансом
+      // Если документа не существует, создаем его с балансом 0
       await setDoc(userRef, { balance: 0 });
       return 0;
     }
   } catch (error) {
-    console.error('Error getting balance: ', error);
+    console.error('Ошибка при получении баланса:', error);
+    return 0;
   }
 };
 
 // Функция для обновления баланса пользователя
-export const updateBalance = async (userId, amount) => {
+export const updateBalance = async (userId, newBalance) => {
   try {
     const userRef = doc(db, "users", userId);
-    const docSnap = await getDoc(userRef);
-
-    if (docSnap.exists()) {
-      const newBalance = docSnap.data().balance + amount;
-      await updateDoc(userRef, { balance: newBalance });
-      return newBalance;
-    } else {
-      console.error('User not found');
-      return null;
-    }
+    await setDoc(userRef, { balance: newBalance }, { merge: true });  // Обновляем баланс, если он существует
+    return newBalance;
   } catch (error) {
-    console.error('Error updating balance: ', error);
+    console.error('Ошибка при обновлении баланса:', error);
+    return null;
   }
 };
 
