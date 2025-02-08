@@ -186,7 +186,7 @@ const Mining = () => {
   }, [userId]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+    <div className="flex flex-col items-center justify-center h-full bg-gray-50">
       <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
       <p className="text-xl mb-4 text-gray-800">Ваши монеты: {balance}</p>
       <p className="text-xl mb-4 text-gray-800">
