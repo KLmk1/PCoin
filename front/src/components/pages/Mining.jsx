@@ -1,72 +1,84 @@
-import { useState, useEffect } from "react";
-import { auth, logOut, getBalance } from "../../firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { auth, getBalance, updateBalance } from '../../firebase'; 
+import { onAuthStateChanged } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
-const Profile = () => {
+const Mining = () => {
   const [user, setUser] = useState(null);
-  const [balance, setBalance] = useState(0); // Баланс пользователя
-  const [loading, setLoading] = useState(true); // Стейт для отображения состояния загрузки
+  const [balance, setBalance] = useState(0);
+  const [displayedBalance, setDisplayedBalance] = useState(0); // Баланс для отображения
+  const [animating, setAnimating] = useState(false); // Стейт для анимации
   const navigate = useNavigate();
 
-  // Отслеживаем состояние пользователя и получаем его баланс
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        try {
-          // Получаем баланс с Firebase
-          const userBalance = await getBalance(currentUser.uid);
-          setBalance(userBalance); // Обновляем стейт с балансом
-        } catch (error) {
-          console.error("Ошибка при получении баланса:", error.message);
-        }
-        setLoading(false); // Убираем индикатор загрузки
+        const balance = await getBalance(currentUser.uid);
+        setBalance(balance); // Получаем реальный баланс пользователя
+        setDisplayedBalance(balance); // Устанавливаем начальный баланс для отображения
       } else {
-        navigate("/PCoin/auth"); // Если пользователь не авторизован, перенаправляем на страницу аутентификации
+        navigate('/PCoin/auth');
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  const handleSignOut = async () => {
-    try {
-      await logOut();
-      navigate("/PCoin/auth"); // После выхода перенаправляем на страницу аутентификации
-    } catch (error) {
-      console.error("Ошибка выхода:", error.message);
+  const mineCoins = async () => {
+    if (user && !animating) { // Проверяем, не идет ли анимация
+      setAnimating(true);
+
+      // Загружаем актуальный баланс один раз
+      const currentBalance = await getBalance(user.uid);
+
+      // Анимация увеличения баланса
+      let i = 1;
+      const animate = () => {
+        if (i <= 5) {
+          setDisplayedBalance(prev => prev + 1); // Увеличиваем отображаемый баланс
+          i++;
+          requestAnimationFrame(animate); // Повторяем анимацию
+        } else {
+          // После завершения анимации обновляем баланс в Firebase
+          setTimeout(async () => {
+            const newBalance = currentBalance + 5; // Добавляем 5 монет
+            const updatedBalance = await updateBalance(user.uid, newBalance);
+            setBalance(updatedBalance); // Обновляем реальный баланс
+            setAnimating(false); // Останавливаем анимацию
+          }, 100);
+        }
+      };
+
+      requestAnimationFrame(animate); // Начинаем анимацию
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-      {loading ? (
-        <div className="text-lg text-gray-600">Загрузка данных...</div>
+      {user ? (
+        <div className="text-center">
+          <h2 className="text-4xl font-bold text-gray-800 mb-6">Привет! Кликайте по PencilCoin, чтобы получить монеты!</h2>
+          
+          {/* Изображение, которое выполняет роль кнопки */}
+          <img 
+            src="PencilCoin.png"  // Убедитесь, что путь правильный
+            alt="Pencil Coin"
+            onClick={mineCoins}
+            className="cursor-pointer mb-6 transition-transform transform hover:scale-110 ml-auto mr-auto" 
+          />
+          <p className="text-lg text-gray-600 mb-4">
+            Ваш баланс: 
+            <span className={`coin-animation ${animating ? 'coin-animation' : ''}`}>
+              {displayedBalance} PencilCoins
+            </span>
+          </p>
+        </div>
       ) : (
-        user && (
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4 flex justify-center items-center">
-              <img
-                src={user.photoURL || "/default-avatar.png"} // Используем стандартное изображение, если нет photoURL
-                alt="Profile"
-                className="w-24 h-24 rounded-full mb-4 inline-block mr-5"
-              />
-              {user.displayName}
-            </h2>
-            <p className="text-lg text-gray-600 mb-2">Email: {user.email}</p>
-            <p className="text-lg text-gray-600 mb-4">Баланс: {balance} PencilCoins</p>
-            <button
-              onClick={handleSignOut}
-              className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-400 transition duration-300"
-            >
-              Выйти
-            </button>
-          </div>
-        )
+        <p className="text-lg text-gray-600">Загрузка данных...</p>
       )}
     </div>
   );
 };
 
-export default Profile;
+export default Mining;
