@@ -13,7 +13,7 @@ const AuthPage = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        navigate("/profile"); // Перенаправляем на профиль после входа
+        navigate("/PCoin/profile"); // Перенаправляем на профиль после входа
       }
     });
 
