@@ -8,7 +8,7 @@ const App = () => {
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col">
       {/* Навигация */}
-      <nav className="p-4 bg-gray-800 flex justify-between items-center">
+      <nav className="p-4 bg-gray-800 flex justify-between items-center pl-40 pr-40">
         <h1 className="text-xl font-bold">PencilCoin</h1>
         <div className="flex space-x-6">
           <Link to="/PCoin/" className="flex items-center hover:text-yellow-400 transform transition-transform hover:scale-105">

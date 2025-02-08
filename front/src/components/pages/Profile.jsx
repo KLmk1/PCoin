@@ -1,6 +1,6 @@
 // ProfilePage.js
 import { useState, useEffect } from "react";
-import { auth, logOut, getBalance } from "../../firebase";
+import { auth, logOut, getBalance } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
