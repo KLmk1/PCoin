@@ -1,77 +1,203 @@
-import { useState, useEffect } from 'react';
-import { auth, getBalance, updateBalance } from '../firebase'; 
-import { onAuthStateChanged } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Импортируем нужные функции из Firebase v9
+import { getBalance, updateBalance } from '../firebase'; // Импортируем функции для работы с балансом
+import confetti from 'canvas-confetti'; // Импортируем библиотеку для конфетти
 
 const Mining = () => {
-  const [user, setUser] = useState(null);
-  const [balance, setBalance] = useState(0);
-  const [displayedBalance, setDisplayedBalance] = useState(0); // Баланс для отображения
-  const [animating, setAnimating] = useState(false); // Стейт для анимации
-  const navigate = useNavigate();
+  const canvasRef = useRef(null); // Ссылка на канвас
+  const ctxRef = useRef(null); // Ссылка на контекст канваса
+  const [isErasing, setIsErasing] = useState(false); // Состояние для отслеживания, стираем ли мы
+  const [coins, setCoins] = useState(0); // Состояние для отслеживания монет
+  const [erasedPercentage, setErasedPercentage] = useState(0); // Состояние для отслеживания прогресса стирания
+  const [balance, setBalance] = useState(0); // Баланс пользователя
+  const [userId, setUserId] = useState(null); // Идентификатор пользователя
 
+  // Регулировка размера канваса при изменении размера окна
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // Устанавливаем размеры канваса на основе окна браузера
+      canvas.width = window.innerWidth * 0.9; // 90% от ширины окна
+      canvas.height = window.innerHeight * 0.6; // 60% от высоты окна
+      drawCanvas(); // Перерисовываем канвас после изменения размера
+    }
+  }, []);
+
+  // Рисование на канвасе (фон)
+  const drawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+
+    if (canvas && ctx) {
+      // Рисуем серый фон на канвасе
+      ctx.fillStyle = 'gray';
+      ctx.fillRect(0, 0, canvas.width, canvas.height); // Рисуем прямоугольник, который заполняет весь канвас
+    }
+  }, []);
+
+  // Функция стирания
+  const erase = useCallback((x, y) => {
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+
+    if (canvas && ctx) {
+      // Устанавливаем режим стирания
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 40, 0, Math.PI * 2); // Радиус ластика
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over'; // Восстанавливаем нормальный режим рисования
+    }
+  }, []);
+
+  // Проверка процента стертой области
+  const checkErasedPercentage = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+
+    if (canvas && ctx) {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      let erasedPixels = 0;
+
+      // Считаем количество прозрачных пикселей (стертых)
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] === 0) erasedPixels++;
+      }
+
+      const totalPixels = canvas.width * canvas.height;
+      const percentage = (erasedPixels / totalPixels) * 100;
+
+      return percentage;
+    }
+
+    return 0;
+  }, []);
+
+  // Добавляем конфетти
+  const triggerConfetti = useCallback(() => {
+    confetti({
+      particleCount: 400,
+      angle: 0,
+      spread: 360,
+      origin: { x: 0.5, y: 0.5 },
+    });
+  }, []);
+
+  // Обработчики событий для мыши и касаний
+  const handleEraseStart = useCallback((e) => {
+    setIsErasing(true);
+    const { clientX, clientY } = e.touches ? e.touches[0] : e;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    erase(x, y);
+  }, [erase]);
+
+  const handleEraseMove = useCallback((e) => {
+    if (isErasing) {
+      const { clientX, clientY } = e.touches ? e.touches[0] : e;
+      const rect = canvasRef.current.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      erase(x, y);
+
+      // Проверяем прогресс стирания
+      const percentage = checkErasedPercentage();
+      setErasedPercentage(percentage);
+
+      // Если стирано 80%, начисляем монеты, сбрасываем канвас и запускаем конфетти
+      if (percentage >= 80) {
+        const earnedCoins = 1; // Начисляем 1 монету
+        setCoins((prev) => prev + earnedCoins); // Начисляем монеты
+        setBalance((prev) => prev + earnedCoins); // Обновляем баланс
+        setErasedPercentage(0); // Сбрасываем прогресс
+        drawCanvas(); // Перерисовываем канвас
+
+        // Добавляем эффект конфетти
+        triggerConfetti();
+
+        // Обновляем баланс в Firebase
+        if (userId) {
+          updateBalance(userId, balance + earnedCoins)
+            .then(() => console.log('Balance updated successfully'))
+            .catch((error) => console.error('Error updating balance:', error));
+        }
+      }
+    }
+  }, [isErasing, erase, checkErasedPercentage, drawCanvas, userId, balance, triggerConfetti]);
+
+  const handleEraseEnd = useCallback(() => {
+    setIsErasing(false);
+  }, []);
+
+  // Инициализация канваса и добавление слушателей событий
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        const balance = await getBalance(currentUser.uid);
-        setBalance(balance); // Получаем реальный баланс пользователя
-        setDisplayedBalance(balance); // Устанавливаем начальный баланс для отображения
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctxRef.current = ctx; // Сохраняем контекст
+    resizeCanvas(); // Устанавливаем начальные размеры канваса
+
+    // Добавляем слушатели событий для мыши и касаний
+    canvas.addEventListener('mousedown', handleEraseStart);
+    canvas.addEventListener('mousemove', handleEraseMove);
+    canvas.addEventListener('mouseup', handleEraseEnd);
+    canvas.addEventListener('touchstart', handleEraseStart);
+    canvas.addEventListener('touchmove', handleEraseMove);
+    canvas.addEventListener('touchend', handleEraseEnd);
+
+    // Очистка слушателей при размонтировании компонента
+    return () => {
+      canvas.removeEventListener('mousedown', handleEraseStart);
+      canvas.removeEventListener('mousemove', handleEraseMove);
+      canvas.removeEventListener('mouseup', handleEraseEnd);
+      canvas.removeEventListener('touchstart', handleEraseStart);
+      canvas.removeEventListener('touchmove', handleEraseMove);
+      canvas.removeEventListener('touchend', handleEraseEnd);
+    };
+  }, [handleEraseStart, handleEraseMove, handleEraseEnd, resizeCanvas]);
+
+  // Загрузка баланса при монтировании компонента
+  useEffect(() => {
+    const auth = getAuth(); // Получаем экземпляр auth
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
       } else {
-        navigate('/PCoin/auth');
+        setUserId(null);
       }
     });
 
-    return () => unsubscribe();
-  }, [navigate]);
+    // Загружаем баланс после того, как userId установлен
+    if (userId) {
+      const fetchData = async () => {
+        const userBalance = await getBalance(userId);
+        setBalance(userBalance);
+      };
 
-  const mineCoins = async () => {
-    if (user && !animating) { // Проверяем, не идет ли анимация
-      setAnimating(true);
-
-      // Загружаем актуальный баланс один раз
-      const currentBalance = await getBalance(user.uid);
-      
-      // Анимация увеличения баланса
-      for (let i = 1; i <= 5; i++) {
-        setTimeout(() => {
-          setDisplayedBalance(prev => prev + 1); // Увеличиваем отображаемый баланс
-        }, i * 100); // Задержка на каждое увеличение
-      }
-
-      // Обновляем баланс в Firebase после завершения анимации
-      setTimeout(async () => {
-        const newBalance = currentBalance + 5; // Добавляем 5 монет
-        const updatedBalance = await updateBalance(user.uid, newBalance);
-        setBalance(updatedBalance); // Обновляем реальный баланс
-        setAnimating(false); // Останавливаем анимацию
-      }, 500); // Задержка для завершения анимации
+      fetchData();
     }
-  };
+
+    return () => unsubscribe();
+  }, [userId]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-      {user ? (
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-gray-800 mb-6">Привет! Кликайте по PencilCoin, чтобы получить монеты!</h2>
-          
-          {/* Изображение, которое выполняет роль кнопки */}
-          <img 
-            src="PencilCoin.png"  // Убедитесь, что путь правильный
-            alt="Pencil Coin"
-            onClick={mineCoins}
-            className="cursor-pointer mb-6 transition-transform transform hover:scale- ml-auto mr-auto w-1/4 h-1/2" 
-          />
-          <p className="text-lg text-gray-600 mb-4">
-            Ваш баланс: 
-            <span className={`coin-animation ${animating ? 'coin-animation' : ''}`}>
-              {displayedBalance} PencilCoins
-            </span>
-          </p>
-        </div>
-      ) : (
-        <p className="text-lg text-gray-600">Загрузка данных...</p>
-      )}
+      <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
+      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {balance}</p>
+      <p className="text-xl mb-4 text-gray-800">
+        Прогресс: {(erasedPercentage * 1.25).toFixed(2)}% / 100%
+      </p>
+      {/* Канвас для рисования */}
+      <canvas
+        ref={canvasRef}
+        className="border border-black bg-gray-300"
+        style={{ width: '90%', height: '60%' }}
+      />
     </div>
   );
 };
