@@ -1,1 +1,42 @@
 @import "tailwindcss";
+html, body {
+    margin: 0;           /* Убираем отступы по умолчанию */
+    padding: 0;          /* Убираем отступы по умолчанию */
+    height: 100%;        /* Задаем высоту 100% */
+    width: 100%;         /* Задаем ширину 100% */
+    display: flex;       /* Используем flexbox для растягивания */
+    flex-direction: column; /* Вертикальная ориентация */
+  }
+  
+  #root {
+    display: flex;
+    flex-direction: column; /* Контент растягивается по вертикали */
+    min-height: 100%;       /* Обеспечиваем минимальную высоту */
+  }
+  
+  /* Ваши другие стили */
+  /* Добавьте это в глобальные стили */
+  html {
+    scroll-behavior: smooth;
+  }
+  /* Стилизация вертикальной и горизонтальной полос прокрутки */
+  ::-webkit-scrollbar {
+    width: 8px; /* Ширина вертикальной полосы прокрутки */
+    height: 8px; /* Высота горизонтальной полосы прокрутки */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: #4B5563; /* Цвет полосы прокрутки */
+    border-radius: 10px; /* Скругление углов */
+    transition: background-color 0.3s ease;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #F59E0B; /* Цвет при наведении */
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1); /* Фон полосы прокрутки */
+    border-radius: 10px; /* Скругление фона полосы прокрутки */
+  }
+  
