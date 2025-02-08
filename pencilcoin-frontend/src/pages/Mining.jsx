@@ -19,7 +19,7 @@ const Mining = () => {
         setBalance(balance); // Получаем реальный баланс пользователя
         setDisplayedBalance(balance); // Устанавливаем начальный баланс для отображения
       } else {
-        navigate('/auth');
+        navigate('/PCoin/auth');
       }
     });
 

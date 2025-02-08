@@ -18,7 +18,7 @@ const Profile = () => {
         const userBalance = await getBalance(currentUser.uid);
         setBalance(userBalance);  // Обновляем стейт с балансом
       } else {
-        navigate("/auth"); // Если пользователь не авторизован, перенаправляем на страницу аутентификации
+        navigate("/PCoin/auth"); // Если пользователь не авторизован, перенаправляем на страницу аутентификации
       }
     });
 
@@ -28,7 +28,7 @@ const Profile = () => {
   const handleSignOut = async () => {
     try {
       await logOut();
-      navigate("/auth"); // После выхода перенаправляем на страницу аутентификации
+      navigate("/PCoin//auth"); // После выхода перенаправляем на страницу аутентификации
     } catch (error) {
       console.error("Ошибка выхода:", error.message);
     }
