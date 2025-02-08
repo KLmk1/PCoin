@@ -3,6 +3,7 @@ import Home from "./components/pages/Home";
 import Profile from "./components/pages/Profile";
 import Auth from "./components/pages/Auth";
 import Mining from "./components/pages/Mining";
+import Error from "./components/pages/404";
 
 const App = () => {
   return (
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/PCoin/profile" element={<Profile />} />
           <Route path="/PCoin/auth" element={<Auth />} />
           <Route path="/PCoin/mining" element={<Mining />} />
+          <Route path="*" element={<Error/>} />
         </Routes>
       </main>
     </div>
