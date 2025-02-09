@@ -15,7 +15,7 @@ const App = () => {
       {/* Навигация */}
       <nav className="p-4 bg-gray-800 flex justify-between items-center px-4 sm:px-10">
         {/* Логотип и название */}
-        <h1 className="text-xl font-bold sm:block">PencilCoin</h1>
+        <h1 className="text-xl font-bold sm:block"><img src="logot.png" alt="logo" className="h-6"/></h1>
 
         {/* Иконки */}
         <div className="flex space-x-6">
