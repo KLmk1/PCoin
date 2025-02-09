@@ -1,7 +1,6 @@
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, updateDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -96,7 +95,7 @@ export const updateBalance = async (userId, newBalance) => {
 
   try {
     const userRef = doc(db, "users", userId);
-    await setDoc(userRef, { balance: newBalance }, { merge: true }); // Обновляем баланс
+    await updateDoc(userRef, { balance: newBalance }); // Обновляем баланс
     return newBalance;
   } catch (error) {
     console.error('Ошибка при обновлении баланса:', error);
@@ -105,51 +104,44 @@ export const updateBalance = async (userId, newBalance) => {
 };
 
 /**
- * Получение времени последнего начисления монет.
+ * Получение количества монет пользователя.
  * @param {string} userId - Идентификатор пользователя.
- * @returns {Promise<number>} Время последнего начисления монет.
+ * @returns {Promise<number>} Количество монет пользователя.
  */
-export const getLastRewardTime = async (userId) => {
-  if (!userId) {
-    console.error('User ID is required');
-    return null;
-  }
+export const getCoins = async (userId) => {
+  const userRef = doc(db, "users", userId); // Ссылка на документ пользователя
+  const userDoc = await getDoc(userRef);
 
-  try {
-    const userRef = doc(db, "users", userId); // Ссылка на документ пользователя
-    const userDoc = await getDoc(userRef);
-
-    if (userDoc.exists()) {
-      return userDoc.data().lastRewardTime || null; // Возвращаем время последнего начисления, если оно существует
-    } else {
-      // Если документа нет, возвращаем null
-      console.error('Документ не найден');
-      return null;
-    }
-  } catch (error) {
-    console.error('Ошибка при получении времени последнего начисления:', error);
-    return null;
+  if (userDoc.exists()) {
+    return userDoc.data().coins || 0; // Возвращаем количество монет
+  } else {
+    // Если документа нет, создаем его с 0 монетами
+    await setDoc(userRef, { coins: 0 }, { merge: true });
+    return 0;
   }
 };
 
 /**
- * Обновление времени последнего начисления монет.
+ * Обновить количество монет пользователя.
  * @param {string} userId - Идентификатор пользователя.
- * @param {number} timestamp - Время последнего начисления (время в миллисекундах).
- * @returns {Promise<void>} Обновление времени последнего начисления.
+ * @param {number} newCoins - Новое количество монет.
+ * @returns {Promise<number>} Обновленное количество монет.
  */
-export const updateLastRewardTime = async (userId, timestamp) => {
-  if (!userId || typeof timestamp !== 'number') {
-    console.error('Invalid user ID or timestamp');
-    return;
-  }
+export const updateCoins = async (userId, newCoins) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { coins: newCoins }); // Обновляем монеты
+  return newCoins;
+};
 
-  try {
-    const userRef = doc(db, "users", userId); // Ссылка на документ пользователя
-    await setDoc(userRef, { lastRewardTime: timestamp }, { merge: true }); // Обновляем время последнего начисления
-  } catch (error) {
-    console.error('Ошибка при обновлении времени последнего начисления:', error);
-  }
+/**
+ * Восстановить монеты до 20 для пользователя.
+ * @param {string} userId - Идентификатор пользователя.
+ * @returns {Promise<number>} Обновленное количество монет.
+ */
+export const restoreCoins = async (userId) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { coins: 20 }); // Восстанавливаем монеты до 20
+  return 20;
 };
 
 // Экспорт констант для использования в других частях приложения
