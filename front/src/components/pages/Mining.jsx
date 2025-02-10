@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getBalance, updateBalance, getCoins, updateCoins } from '../firebase';
 import confetti from 'canvas-confetti';
 import { useNavigate } from "react-router-dom";
+import { debounce } from 'lodash';
 
 const MAX_COINS = 20;
 
@@ -14,6 +15,7 @@ const Mining = () => {
   const [isErasing, setIsErasing] = useState(false);
   const [userId, setUserId] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,11 +23,17 @@ const Mining = () => {
       if (currentUser) {
         setUser(currentUser);
         setUserId(currentUser.uid);
-        const [storedBalance, storedCoins] = await Promise.all([
-          getBalance(currentUser.uid),
-          getCoins(currentUser.uid)
-        ]);
-        setMiningData({ balance: storedBalance, coins: storedCoins });
+        try {
+          const [storedBalance, storedCoins] = await Promise.all([
+            getBalance(currentUser.uid),
+            getCoins(currentUser.uid)
+          ]);
+          setMiningData({ balance: storedBalance, coins: storedCoins });
+        } catch (error) {
+          console.error("Ошибка загрузки данных:", error);
+        } finally {
+          setLoading(false);
+        }
       } else {
         navigate("/PCoin/auth");
       }
@@ -42,7 +50,7 @@ const Mining = () => {
         updateCoins(userId, newCoins);
         return { ...prevData, coins: newCoins };
       });
-    }, 60 * 1000);
+    }, 5000);
 
     return () => clearInterval(miningInterval);
   }, [userId]);
@@ -108,20 +116,25 @@ const Mining = () => {
       const { clientX, clientY } = e.touches ? e.touches[0] : e;
       const rect = canvasRef.current.getBoundingClientRect();
       erase(clientX - rect.left, clientY - rect.top);
+      
       const percentage = checkErasedPercentage();
       setErasedPercentage(percentage);
 
       if (percentage >= 80 && miningData.coins < MAX_COINS) {
-        setMiningData(prevData => {
-          const newCoins = Math.min(prevData.coins + 1, MAX_COINS);
-          if (newCoins !== prevData.coins) {
-            setMiningData(prevData => ({ ...prevData, coins: newCoins }));
-            updateCoins(userId, newCoins);
-            updateBalance(userId, prevData.balance + 1);
-            triggerConfetti();
-          }
-          return prevData;
-        });
+        const newCoins = Math.min(miningData.coins + 1, MAX_COINS);
+
+        if (newCoins !== miningData.coins) {
+          setMiningData(prevData => ({
+            ...prevData,
+            coins: newCoins,
+            balance: prevData.balance + 1
+          }));
+
+          updateCoins(userId, newCoins);
+          updateBalance(userId, miningData.balance + 1);
+
+          triggerConfetti();
+        }
       }
     }
   }, [isErasing, erase, checkErasedPercentage, userId, miningData, triggerConfetti]);
@@ -129,6 +142,8 @@ const Mining = () => {
   const handleEraseEnd = useCallback(() => {
     setIsErasing(false);
   }, []);
+
+  const debouncedResizeCanvas = useCallback(debounce(resizeCanvas, 200), [resizeCanvas]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -143,6 +158,9 @@ const Mining = () => {
     canvas.addEventListener('touchstart', handleEraseStart);
     canvas.addEventListener('touchmove', handleEraseMove);
     canvas.addEventListener('touchend', handleEraseEnd);
+
+    window.addEventListener('resize', debouncedResizeCanvas);
+
     return () => {
       canvas.removeEventListener('mousedown', handleEraseStart);
       canvas.removeEventListener('mousemove', handleEraseMove);
@@ -150,14 +168,23 @@ const Mining = () => {
       canvas.removeEventListener('touchstart', handleEraseStart);
       canvas.removeEventListener('touchmove', handleEraseMove);
       canvas.removeEventListener('touchend', handleEraseEnd);
+      window.removeEventListener('resize', debouncedResizeCanvas);
     };
-  }, [handleEraseStart, handleEraseMove, handleEraseEnd, resizeCanvas]);
+  }, [handleEraseStart, handleEraseMove, handleEraseEnd, resizeCanvas, debouncedResizeCanvas]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <p className="text-2xl text-gray-700 font-semibold">Загрузка...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-50">
       <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
       <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance}</p>
-      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {MAX_COINS - miningData.coins} / {MAX_COINS}</p>
+      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}</p>
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
         <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${erasedPercentage * 1.25}%` }} />
       </div>
