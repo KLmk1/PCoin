@@ -20,7 +20,7 @@ const App = () => {
           <div className="relative flex items-center">
             <Link to="/PCoin/mining" className="flex items-center hover:text-yellow-400 transform transition-transform hover:scale-105">
               <img
-                src="mine.png"
+                src="swipe.png"
                 className="w-6 h-6 rounded-full transition-transform duration-300 filter invert"
                 alt="Get Coins Icon"
               />

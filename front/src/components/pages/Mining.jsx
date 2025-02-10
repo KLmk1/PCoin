@@ -50,7 +50,7 @@ const Mining = () => {
         updateCoins(userId, newCoins);
         return { ...prevData, coins: newCoins };
       });
-    }, 5000);
+    }, 30000);
 
     return () => clearInterval(miningInterval);
   }, [userId]);
@@ -174,8 +174,8 @@ const Mining = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-        <p className="text-2xl text-gray-700 font-semibold">Загрузка...</p>
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
       </div>
     );
   }
@@ -186,9 +186,9 @@ const Mining = () => {
       <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance}</p>
       <p className="text-xl mb-4 text-gray-800">Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}</p>
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
-        <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${erasedPercentage * 1.25}%` }} />
+        <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }} />
       </div>
-      <p className="text-xl mb-4 text-gray-800">Прогресс: {(erasedPercentage * 1.25).toFixed(2)}% / 100%</p>
+      <p className="text-xl mb-4 text-gray-800">Прогресс: {Math.min((erasedPercentage * 1.25).toFixed(2), 100)}% / 100%</p>
       <canvas ref={canvasRef} className="border border-black bg-gray-300" style={{ width: '90%', height: '60%' }} />
     </div>
   );

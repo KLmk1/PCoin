@@ -18,7 +18,7 @@ const Profile = () => {
         try {
           const userBalance = await getBalance(currentUser.uid);
           setBalance(userBalance);
-        } catch (err) {
+        } catch {
           setError("Ошибка загрузки баланса. Попробуйте снова.");
         }
       } else {

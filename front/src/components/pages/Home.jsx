@@ -1,18 +1,32 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-// Фиксированные позиции для картинок
 const fixedPositions = [
-  { top: "5%", left: "15%" }, // Тонкой 1
-  { top: "25%", left: "70%" }, // Тонкой 2
-  { top: "65%", left: "75%" }, // Тонкой 3
-  { top: "70%", left: "15%" }, // График 1
-  { top: "25%", left: "30%" }, // График 2
+  { top: "5%", left: "15%" },
+  { top: "25%", left: "70%" },
+  { top: "65%", left: "75%" },
+  { top: "70%", left: "15%" },
+  { top: "25%", left: "30%" },
 ];
 
 const Home = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-full flex flex-col items-center justify-center bg-gray-900 text-white overflow-hidden">
-      {/* Заголовок поверх всего */}
       <div className="absolute z-50 text-center flex flex-col items-center">
         <Link
           to="/PCoin/profile"
@@ -23,12 +37,11 @@ const Home = () => {
         </Link>
       </div>
 
-      {/* Случайные изображения с фиксированными позициями */}
       <div className="absolute w-full h-full">
         {fixedPositions.map((pos, index) => (
           <img
             key={index}
-            src={index < 3 ? "toncoin.png" : "graf1.png"} // 3 TonCoin, 2 графика
+            src={index < 3 ? "toncoin.png" : "graf1.png"}
             alt="Крипто"
             className="absolute object-contain opacity-80 transition-transform duration-500 z-10 animate-scale"
             style={{
@@ -41,7 +54,6 @@ const Home = () => {
         ))}
       </div>
 
-      {/* Светящиеся фигуры */}
       <div className="absolute w-full h-full overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
