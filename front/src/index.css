@@ -1,18 +1,19 @@
 @import "tailwindcss";
 html, body {
-    margin: 0;           /* Убираем отступы по умолчанию */
-    padding: 0;          /* Убираем отступы по умолчанию */
-    height: 100%;        /* Задаем высоту 100% */
-    width: 100%;         /* Задаем ширину 100% */
-    display: flex;       /* Используем flexbox для растягивания */
-    flex-direction: column; /* Вертикальная ориентация */
-  }
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Это отключает прокрутку */
+}
   
-  #root {
-    display: flex;
-    flex-direction: column; /* Контент растягивается по вертикали */
-    min-height: 100%;       /* Обеспечиваем минимальную высоту */
-  }
+#root {
+  display: flex;
+  flex-direction: column;
+  overflow: auto; /* Разрешает прокрутку только внутри #root */
+}
   
   /* Ваши другие стили */
   /* Добавьте это в глобальные стили */
@@ -38,5 +39,20 @@ html, body {
   ::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.1); /* Фон полосы прокрутки */
     border-radius: 10px; /* Скругление фона полосы прокрутки */
+  }
+  @keyframes scaleAnimation {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1); /* Увеличение */
+    }
+    100% {
+      transform: scale(1); /* Возвращение к исходному размеру */
+    }
+  }
+  
+  .animate-scale {
+    animation: scaleAnimation 3s ease-in-out infinite;
   }
   

@@ -1,52 +1,51 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getBalance, updateBalance, getCoins, updateCoins, restoreCoins } from '../firebase';
+import { getBalance, updateBalance, getCoins, updateCoins } from '../firebase';
 import confetti from 'canvas-confetti';
+import { useNavigate } from "react-router-dom";
 
 const MAX_COINS = 20;
 
 const Mining = () => {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
-  const [isErasing, setIsErasing] = useState(false);
-  const [coins, setCoins] = useState(0); // текущие монеты
+  const [miningData, setMiningData] = useState({ coins: 0, balance: 0 });
   const [erasedPercentage, setErasedPercentage] = useState(0);
-  const [balance, setBalance] = useState(0);
+  const [isErasing, setIsErasing] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-  // Функция для обновления монет каждую минуту до 20
   useEffect(() => {
-    const coinsInterval = setInterval(() => {
-      if (coins > 0) {
-        setCoins((prevCoins) => {
-          const newCoins = Math.min(prevCoins - 1, MAX_COINS);
-          // Обновление монет в Firestore
-          if (userId) {
-            updateCoins(userId, newCoins);
-          }
-          return newCoins;
-        }); 
-      }
-    }, 6 * 60 * 1000); // 1 час
-
-    return () => clearInterval(coinsInterval);
-  }, [coins, userId]);
-
-  // Получение баланса и монет из Firestore
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-        getBalance(user.uid).then(setBalance);
-        getCoins(user.uid).then(setCoins); // Получаем монеты при авторизации
+    const unsubscribe = onAuthStateChanged(getAuth(), async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        setUserId(currentUser.uid);
+        const [storedBalance, storedCoins] = await Promise.all([
+          getBalance(currentUser.uid),
+          getCoins(currentUser.uid)
+        ]);
+        setMiningData({ balance: storedBalance, coins: storedCoins });
       } else {
-        setUserId(null);
+        navigate("/PCoin/auth");
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const miningInterval = setInterval(() => {
+      setMiningData(prevData => {
+        const newCoins = Math.max(prevData.coins - 1, 0);
+        updateCoins(userId, newCoins);
+        return { ...prevData, coins: newCoins };
+      });
+    }, 60 * 1000);
+
+    return () => clearInterval(miningInterval);
+  }, [userId]);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -108,31 +107,24 @@ const Mining = () => {
     if (isErasing) {
       const { clientX, clientY } = e.touches ? e.touches[0] : e;
       const rect = canvasRef.current.getBoundingClientRect();
-      erase(clientX - rect.left, clientY - rect.top); // срабатывает быстрее при движении
+      erase(clientX - rect.left, clientY - rect.top);
       const percentage = checkErasedPercentage();
       setErasedPercentage(percentage);
 
-      if (percentage >= 80 && coins < MAX_COINS) {
-        setCoins((prevCoins) => {
-          const newCoins = Math.min(prevCoins + 1, MAX_COINS);
-          if (newCoins <= MAX_COINS) {
-            // Обновляем баланс
-            setBalance((prevBalance) => {
-              const newBalance = prevBalance + 1;
-              if (userId) {
-                // Обновление баланса на сервере
-                updateBalance(userId, newBalance);
-                updateCoins(userId, newCoins); // Обновляем монеты в Firestore
-              }
-              return newBalance;
-            });
+      if (percentage >= 80 && miningData.coins < MAX_COINS) {
+        setMiningData(prevData => {
+          const newCoins = Math.min(prevData.coins + 1, MAX_COINS);
+          if (newCoins !== prevData.coins) {
+            setMiningData(prevData => ({ ...prevData, coins: newCoins }));
+            updateCoins(userId, newCoins);
+            updateBalance(userId, prevData.balance + 1);
+            triggerConfetti();
           }
-          return newCoins;
+          return prevData;
         });
-        triggerConfetti();
       }
     }
-  }, [isErasing, erase, checkErasedPercentage, userId, triggerConfetti, coins]);
+  }, [isErasing, erase, checkErasedPercentage, userId, miningData, triggerConfetti]);
 
   const handleEraseEnd = useCallback(() => {
     setIsErasing(false);
@@ -164,8 +156,8 @@ const Mining = () => {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-50">
       <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
-      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {balance}</p>
-      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {MAX_COINS - coins} / {MAX_COINS}</p>
+      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance}</p>
+      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {MAX_COINS - miningData.coins} / {MAX_COINS}</p>
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
         <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${erasedPercentage * 1.25}%` }} />
       </div>
