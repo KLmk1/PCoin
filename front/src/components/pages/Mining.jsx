@@ -35,7 +35,7 @@ const Mining = () => {
           setLoading(false);
         }
       } else {
-        navigate("/PCoin/auth");
+        navigate("/auth");
       }
     });
 
@@ -101,7 +101,7 @@ const Mining = () => {
   }, []);
 
   const triggerConfetti = useCallback(() => {
-    confetti({ particleCount: 400, angle: 0, spread: 360, origin: { x: 0.5, y: 0.5 } });
+    confetti({ particleCount: 150, angle: 0, spread: 360, origin: { x: 0.5, y: 0.5 } });
   }, []);
 
   const handleEraseStart = useCallback((e) => {

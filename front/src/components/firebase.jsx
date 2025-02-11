@@ -1,4 +1,4 @@
-import { getFirestore, updateDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, updateDoc, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
@@ -146,3 +146,46 @@ export const restoreCoins = async (userId) => {
 
 // Экспорт констант для использования в других частях приложения
 export { db, auth, app };
+
+/**
+ * Получить топ-10 пользователей по количеству коинов.
+ * @returns {Promise<Array>} Список из 10 лучших пользователей.
+ */
+export const getLeaderboard = async () => {
+  try {
+    const usersRef = collection(db, "users");
+    const querySnapshot = await getDocs(query(usersRef, orderBy("balance", "desc"), limit(10)));
+    
+    return querySnapshot.docs.map(doc => ({
+      uid: doc.id,
+      name: doc.data().name || "Аноним",
+      balance: doc.data().balance || 0
+    }));
+  } catch (error) {
+    console.error("Ошибка получения лидерборда:", error);
+    return [];
+  }
+};
+
+/**
+ * Получить место текущего пользователя в рейтинге.
+ * @param {string} userId - ID пользователя.
+ * @returns {Promise<number>} Место пользователя в рейтинге.
+ */
+export const getUserRank = async (userId) => {
+  try {
+    const usersRef = collection(db, "users");
+    const querySnapshot = await getDocs(query(usersRef, orderBy("balance", "desc")));
+    
+    const users = querySnapshot.docs.map((doc, index) => ({
+      uid: doc.id,
+      rank: index + 1
+    }));
+
+    const userEntry = users.find(user => user.uid === userId);
+    return userEntry ? userEntry.rank : users.length + 1; // Если не найден, значит он последний
+  } catch (error) {
+    console.error("Ошибка получения ранга пользователя:", error);
+    return null;
+  }
+};

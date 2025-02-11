@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { auth, logOut, getBalance } from "../firebase";
+import { auth, logOut, getBalance, getLeaderboard, getUserRank } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -7,24 +7,35 @@ import { motion } from "framer-motion";
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState(true); // Показывает, идет ли загрузка
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [userRank, setUserRank] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        try {
-          const userBalance = await getBalance(currentUser.uid);
-          setBalance(userBalance);
-        } catch {
-          setError("Ошибка загрузки баланса. Попробуйте снова.");
-        }
-      } else {
-        navigate("/PCoin/auth");
+      if (!currentUser) {
+        navigate("/auth");
+        return;
       }
-      setLoading(false);
+
+      setUser(currentUser);
+
+      try {
+        const [userBalance, topUsers] = await Promise.all([getBalance(currentUser.uid), getLeaderboard()]);
+
+        setBalance(userBalance);
+        setLeaderboard(topUsers);
+
+        const rank = topUsers.findIndex(u => u.uid === currentUser.uid);
+        setUserRank(rank !== -1 ? rank + 1 : await getUserRank(currentUser.uid));
+
+      } catch {
+        setError("Ошибка загрузки данных. Попробуйте снова.");
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
@@ -33,11 +44,11 @@ const Profile = () => {
   const handleSignOut = useCallback(async () => {
     try {
       await logOut();
-      navigate("/PCoin/auth");
+      navigate("/auth");
     } catch (err) {
       setError(`Ошибка выхода: ${err.message}`);
     }
-  }, [navigate]);
+  }, [navigate, setError]);
 
   if (loading) {
     return (
@@ -48,14 +59,14 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 md:px-8">
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {user && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center bg-white p-6 rounded-xl shadow-md w-11/12 sm:w-96"
+          className="text-center bg-white p-6 rounded-xl shadow-md w-full mt-10 sm:w-96"
         >
           <motion.img
             src={user.photoURL || "default-avatar.png"}
@@ -77,6 +88,38 @@ const Profile = () => {
           </motion.button>
         </motion.div>
       )}
+
+      {/* Лидерборд */}
+      <motion.div
+        className="mt-6 mb-10 bg-white text-black p-6 rounded-xl shadow-md w-full sm:w-96"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-2xl font-bold mb-4 text-center">🏆 Лидерборд</h2>
+        {leaderboard?.length > 0 ? (
+          leaderboard.map((entry, index) => (
+            <motion.div
+              key={entry.uid}
+              className="flex justify-between p-2 border-b"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }} // Staggered animation
+            >
+              <span>#{index + 1} {entry.name || "Аноним"}</span>
+              <span>{entry.balance} 💰</span>
+            </motion.div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500">Лидерборд пуст</p>
+        )}
+        {user && userRank > 10 && (
+          <div className="mt-4 p-2 bg-yellow-100 rounded-lg">
+            <p className="font-bold">Вы: #{userRank}</p>
+            <p>Баланс: {balance} 💰</p>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 };
