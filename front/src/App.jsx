@@ -9,17 +9,15 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <nav className="p-4 bg-gray-800 flex justify-between items-center px-4 sm:px-10">
+        
         <h1 className="text-xl font-bold sm:block">
-          <img src="logot.png" alt="logo" className="h-6" />
+          <Link to="/" className="flex items-center hover:text-yellow-400 transform transition-transform hover:scale-105">
+            <img src="logot.png" alt="logo" className="h-6" />
+          </Link>
         </h1>
 
         <div className="flex space-x-6">
         <Link to="/mining" className="flex items-center hover:text-yellow-400 transform transition-transform hover:scale-105">
-          <img src="swipe.png" className="w-6 h-6 rounded-full transition-transform duration-300 filter invert" alt="Get Coins Icon" />
-          <span className="ml-2 hidden sm:block">Get Coins</span>
-        </Link>
-
-        <Link to="/" className="flex items-center hover:text-yellow-400 transform transition-transform hover:scale-105">
           <img src="home.png" className="w-6 h-6 rounded-full transition-transform duration-300 filter invert" alt="Home Icon" />
           <span className="ml-2 hidden sm:block">Home</span>
         </Link>
