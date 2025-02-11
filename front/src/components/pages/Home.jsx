@@ -27,9 +27,9 @@ const Home = () => {
 
   return (
     <div className="relative h-full flex flex-col items-center justify-center bg-gray-900 text-white overflow-hidden">
-      <div className="absolute z-50 text-center flex flex-col items-center">
+      <div className="absolute z-50 text-center flex flex-col items-center max-w-3/4">
         <Link
-          to="/PCoin/profile"
+          to="/profile"
           className="transition-transform transform hover:scale-110 hover:shadow-black hover:shadow-md p-4 rounded-lg"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">Добро пожаловать в PencilCoin</h2>
