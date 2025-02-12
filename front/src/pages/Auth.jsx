@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { signInWithGoogle, auth } from "../firebase";
+import { signInWithGoogle, auth } from "../components/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -59,7 +59,7 @@ const AuthPage = () => {
   return (
     <div className="relative flex flex-col items-center justify-center h-full bg-gray-50 overflow-hidden">
       <button
-        className="text-4xl text-white font-bold text-gray-800 bg-blue-500 py-3 px-8 rounded-lg hover:bg-blue-400 transition duration-300 flex items-center z-50 max-w-3/4"
+        className="text-2xl text-white font-bold text-gray-800 bg-blue-500 py-3 px-3 rounded-lg hover:bg-blue-400 transition duration-300 flex items-center z-50 max-w-3/4"
         onClick={handleSignIn}
         disabled={loading} // Отключаем кнопку при загрузке
       >

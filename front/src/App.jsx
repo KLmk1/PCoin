@@ -1,9 +1,10 @@
 import { Routes, Route, Link } from "react-router-dom";
-import Home from "./components/pages/Home";
-import Profile from "./components/pages/Profile";
-import Auth from "./components/pages/Auth";
-import Mining from "./components/pages/Mining";
-import Error from "./components/pages/404";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import Auth from "./pages/Auth";
+import Error from "./pages/404";
+import MiniGames from "./pages/Mining";
+import Slider from "./pages/games/Slider"
 
 const App = () => {
   return (
@@ -34,7 +35,8 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/mining" element={<Mining />} />
+          <Route path="/mining" element={<MiniGames />} />
+          <Route path="/mining/slider" element={<Slider />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </main>

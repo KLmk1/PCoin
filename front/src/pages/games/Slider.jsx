@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getBalance, updateBalance, getCoins, updateCoins } from '../firebase';
+import { getBalance, updateBalance, getCoins, updateCoins } from '../../components/firebase';
 import confetti from 'canvas-confetti';
 import { useNavigate } from "react-router-dom";
 import { debounce } from 'lodash';
 
 const MAX_COINS = 20;
 
-const Mining = () => {
+const Slider = () => {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const [miningData, setMiningData] = useState({ coins: 0, balance: 0 });
@@ -194,4 +194,4 @@ const Mining = () => {
   );
 };
 
-export default Mining;
+export default Slider;

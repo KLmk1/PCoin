@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { auth, logOut, getBalance, getLeaderboard, getUserRank } from "../firebase";
+import { auth, logOut, getBalance, getLeaderboard, getUserRank } from "../components/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
