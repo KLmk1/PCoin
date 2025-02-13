@@ -34,8 +34,6 @@ const LuckyJetGame = () => {
     if (lastValue >= 1 && lastValue <= 1.1) {
       return Math.random() < 0.05 ? 0 : lastValue; // 10% шанс краша при коэффициентах 1 - 1.1
     }
-    
-    if (lastValue < 1.5) return lastValue;
     const crashChance = 0.02 + (lastValue - 1.5) * 0.1;
     return Math.random() < crashChance ? 0 : lastValue;
   };
