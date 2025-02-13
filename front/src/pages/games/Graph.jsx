@@ -32,10 +32,20 @@ const LuckyJetGame = () => {
   const generateGrowth = (lastValue) => lastValue * 1.02;
   const generateCrash = (lastValue) => {
     if (lastValue >= 1 && lastValue <= 1.1) {
-      return Math.random() < 0.05 ? 0 : lastValue; // 10% шанс краша при коэффициентах 1 - 1.1
+      return Math.random() < 0.01 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
     }
-    const crashChance = 0.02 + (lastValue - 1.5) * 0.1;
-    return Math.random() < crashChance ? 0 : lastValue;
+  
+    if (lastValue > 1.1 && lastValue <= 3) {
+      const crashChance = 0.005 + lastValue * 0.008; // Плавный рост вероятности краша
+      return Math.random() < crashChance ? 0 : lastValue;
+    }
+  
+    if (lastValue > 3) {
+      const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
+      return Math.random() < crashChance ? 0 : lastValue;
+    }
+  
+    return lastValue;
   };
   
 
