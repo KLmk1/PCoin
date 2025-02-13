@@ -32,7 +32,7 @@ const LuckyJetGame = () => {
   const generateGrowth = (lastValue) => lastValue * 1.02;
   const generateCrash = (lastValue) => {
     if (lastValue >= 1 && lastValue <= 1.1) {
-      return Math.random() < 0.1 ? 0 : lastValue; // 10% шанс краша при коэффициентах 1 - 1.1
+      return Math.random() < 0.2 ? 0 : lastValue; // 10% шанс краша при коэффициентах 1 - 1.1
     }
     
     if (lastValue < 1.5) return lastValue;
@@ -54,7 +54,7 @@ const LuckyJetGame = () => {
 
         return [...prevData, { time: lastPoint.time + 1, value: newValue }];
       });
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [isCrashed, isWithdrawn, gameStarted]);
