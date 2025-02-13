@@ -29,7 +29,10 @@ const LuckyJetGame = () => {
     return () => unsubscribe();
   }, []);
 
-  const generateGrowth = (lastValue) => lastValue * 1.02;
+  const generateGrowth = (lastValue, time) => {
+    return lastValue * (1.02 + time * 0.0005); // Ускоряем рост со временем
+  };
+  
   const generateCrash = (lastValue) => {
     if (lastValue >= 1 && lastValue <= 1.1) {
       return Math.random() < 0.01 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
@@ -48,24 +51,24 @@ const LuckyJetGame = () => {
     return lastValue;
   };
   
-
   useEffect(() => {
     if (isCrashed || isWithdrawn || !gameStarted) return;
-
+  
     const interval = setInterval(() => {
       setData((prevData) => {
         const lastPoint = prevData[prevData.length - 1];
-        let newValue = generateGrowth(lastPoint.value);
+        let newValue = generateGrowth(lastPoint.value, lastPoint.time);
         newValue = generateCrash(newValue);
-
+  
         if (newValue === 0) setIsCrashed(true);
-
+  
         return [...prevData, { time: lastPoint.time + 1, value: newValue }];
       });
     }, 1000);
-
+  
     return () => clearInterval(interval);
   }, [isCrashed, isWithdrawn, gameStarted]);
+  
 
   useEffect(() => {
     if (prediction && gameStarted && !isCrashed && !isWithdrawn) {
