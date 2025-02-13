@@ -7,6 +7,12 @@ const GameSelection = () => {
       path: "/mining/slider", 
       description: "Зарабатывайте монеты, стирая!", 
       image: "erase.png" 
+    },    
+    { 
+      name: "Graph Game", 
+      path: "/mining/graph", 
+      description: "Зарабатывайте монеты, предсказывая!", 
+      image: "graphgame.png" 
     },
     /*
     { 

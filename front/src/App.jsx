@@ -4,7 +4,8 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import Error from "./pages/404";
 import MiniGames from "./pages/Mining";
-import Slider from "./pages/games/Slider"
+import SliderGame from "./pages/games/slider";
+import GraphGame from "./pages/games/Graph";
 
 const App = () => {
   return (
@@ -36,7 +37,8 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/mining" element={<MiniGames />} />
-          <Route path="/mining/slider" element={<Slider />} />
+          <Route path="/mining/slider" element={<SliderGame />} />
+          <Route path="/mining/graph" element={<GraphGame />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </main>

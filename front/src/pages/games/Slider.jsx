@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 
 const MAX_COINS = 20;
 
-const Slider = () => {
+const SliderGame = () => {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const [miningData, setMiningData] = useState({ coins: 0, balance: 0 });
@@ -182,16 +182,45 @@ const Slider = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-50">
-      <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
-      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance}</p>
-      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}</p>
+      {/* Уменьшённый заголовок */}
+      <h2
+        className="font-bold text-gray-800 mb-6 text-center"
+        style={{ fontSize: 'calc(1rem + 1vw)' }}
+      >
+        Заработайте PencilCoins, стирая!
+      </h2>
+      {/* Уменьшённые параграфы */}
+      <p
+        className="mb-4 text-gray-800"
+        style={{ fontSize: 'calc(0.8rem + 0.5vw)' }}
+      >
+        Ваши монеты: {miningData.balance}
+      </p>
+      <p
+        className="mb-4 text-gray-800"
+        style={{ fontSize: 'calc(0.8rem + 0.5vw)' }}
+      >
+        Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}
+      </p>
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
-        <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }} />
+        <div
+          className="bg-yellow-400 h-4 rounded-full"
+          style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }}
+        />
       </div>
-      <p className="text-xl mb-4 text-gray-800">Прогресс: {Math.min((erasedPercentage * 1.25).toFixed(2), 100)}% / 100%</p>
-      <canvas ref={canvasRef} className="border border-black bg-gray-300" style={{ width: '90%', height: '60%' }} />
+      <p
+        className="mb-4 text-gray-800"
+        style={{ fontSize: 'calc(0.8rem + 0.5vw)' }}
+      >
+        Прогресс: {Math.min((erasedPercentage * 1.25).toFixed(2), 100)}% / 100%
+      </p>
+      <canvas
+        ref={canvasRef}
+        className="border border-black bg-gray-300"
+        style={{ width: '90%', height: '50%' }}
+      />
     </div>
   );
 };
 
-export default Slider;
+export default SliderGame;

@@ -64,7 +64,7 @@ export const getBalance = async (userId) => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      return userDoc.data().balance || 0; // Возвращаем баланс, если документ существует
+      return userDoc.data().balance.toFixed(2) || 0; // Возвращаем баланс, если документ существует
     } else {
       // Если документ не существует, создаем его с балансом 0
       await setDoc(userRef, { balance: 0 });
@@ -96,7 +96,7 @@ export const updateBalance = async (userId, newBalance) => {
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, { balance: newBalance }); // Обновляем баланс
-    return newBalance;
+    return newBalance.toFixed(2);
   } catch (error) {
     console.error('Ошибка при обновлении баланса:', error);
     return null;
@@ -159,7 +159,7 @@ export const getLeaderboard = async () => {
     return querySnapshot.docs.map(doc => ({
       uid: doc.id,
       name: doc.data().name || "Аноним",
-      balance: doc.data().balance || 0
+      balance: doc.data().balance.toFixed(0) || 0
     }));
   } catch (error) {
     console.error("Ошибка получения лидерборда:", error);
@@ -188,4 +188,35 @@ export const getUserRank = async (userId) => {
     console.error("Ошибка получения ранга пользователя:", error);
     return null;
   }
+};
+
+// Получить количество использований функции в текущий день
+export const getDailyUsageCount = async (userId) => {
+  const userRef = doc(db, "users", userId);
+  const userDoc = await getDoc(userRef);
+
+  if (userDoc.exists()) {
+    const data = userDoc.data();
+    const currentDate = new Date().toLocaleDateString(); // Получаем текущую дату в формате "ДД.ММ.ГГГГ"
+    const lastUsageDate = data.lastUsageDate;
+    const usageCount = data.dailyUsageCount || 0;
+
+    // Если дата изменилась (то есть новый день), сбрасываем счетчик
+    if (lastUsageDate !== currentDate) {
+      await updateDoc(userRef, { lastUsageDate: currentDate, dailyUsageCount: 0 });
+      return 0; // Новый день, сбрасываем счетчик
+    }
+
+    return usageCount; // Возвращаем количество использований в текущий день
+  } else {
+    // Если документа нет, создаем его с 0 использований
+    await setDoc(userRef, { dailyUsageCount: 0, lastUsageDate: new Date().toLocaleDateString() }, { merge: true });
+    return 0;
+  }
+};
+
+// Обновить количество использований
+export const updateDailyUsageCount = async (userId, usageCount) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { dailyUsageCount: usageCount });
 };
