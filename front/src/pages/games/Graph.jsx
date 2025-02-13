@@ -17,13 +17,20 @@ const LuckyJetGame = () => {
   const [autoWithdraw, setAutoWithdraw] = useState(false);
   const [currentCoefficient, setCurrentCoefficient] = useState(null);
   const [autoWithdrawCoefficient, setAutoWithdrawCoefficient] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), async (currentUser) => {
+
       if (currentUser) {
-        setUserId(currentUser.uid);
-        const storedBalance = await getBalance(currentUser.uid);
-        setBalance(storedBalance);
+        try {
+          setUserId(currentUser.uid);
+          const storedBalance = await getBalance(currentUser.uid);
+          setBalance(storedBalance);
+        } catch (error) {
+          console.error("Ошибка загрузки данных:", error);
+        } finally {
+          setLoading(false);}
       }
     });
     return () => unsubscribe();
@@ -39,21 +46,18 @@ const LuckyJetGame = () => {
     }
   
     if (lastValue > 1.1 && lastValue <= 3) {
-      const crashChance = 0.005 + lastValue * 0.007; // Плавный рост вероятности краша
+      const crashChance = 0.005 + lastValue * 0.008; // Плавный рост вероятности краша
       return Math.random() < crashChance ? 0 : lastValue;
     }
   
     if (lastValue > 3) {
-      const crashChance = 0.01 + lastValue * 0.008; // Ускоренный рост вероятности краша
+      const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
       return Math.random() < crashChance ? 0 : lastValue;
     }
-  
-    return lastValue;
-  };
+  }
   
   useEffect(() => {
     if (isCrashed || isWithdrawn || !gameStarted) return;
-  
     const interval = setInterval(() => {
       setData((prevData) => {
         const lastPoint = prevData[prevData.length - 1];
@@ -64,7 +68,7 @@ const LuckyJetGame = () => {
   
         return [...prevData, { time: lastPoint.time + 1, value: newValue }];
       });
-    }, 1000);
+    }, 500);
   
     return () => clearInterval(interval);
   }, [isCrashed, isWithdrawn, gameStarted]);
@@ -133,6 +137,13 @@ const LuckyJetGame = () => {
   };
   
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 via-blue-600 to-blue-800 flex items-center justify-center p-8">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl">
@@ -213,7 +224,7 @@ const LuckyJetGame = () => {
             </div>
           </div>
         </div>
-
+                
         {/* Place Bet Button */}
         {/* Withdrawal Button */}
         <div className="flex flex-col items-center space-y-4">
@@ -227,7 +238,7 @@ const LuckyJetGame = () => {
               Забрать {currentCoefficient}X (+{(currentCoefficient * prediction.betAmount).toFixed(2)})
             </Button>
           )}
-          {!isCrashed && (
+          {!isCrashed && !gameStarted && (
             <Button
               onClick={placeBet}
               className="w-full max-w-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg"
