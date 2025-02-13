@@ -39,12 +39,12 @@ const LuckyJetGame = () => {
     }
   
     if (lastValue > 1.1 && lastValue <= 3) {
-      const crashChance = 0.005 + lastValue * 0.008; // Плавный рост вероятности краша
+      const crashChance = 0.005 + lastValue * 0.007; // Плавный рост вероятности краша
       return Math.random() < crashChance ? 0 : lastValue;
     }
   
     if (lastValue > 3) {
-      const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
+      const crashChance = 0.01 + lastValue * 0.008; // Ускоренный рост вероятности краша
       return Math.random() < crashChance ? 0 : lastValue;
     }
   
