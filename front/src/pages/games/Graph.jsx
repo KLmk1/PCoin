@@ -31,10 +31,15 @@ const LuckyJetGame = () => {
 
   const generateGrowth = (lastValue) => lastValue * 1.02;
   const generateCrash = (lastValue) => {
+    if (lastValue >= 1 && lastValue <= 1.1) {
+      return Math.random() < 0.1 ? 0 : lastValue; // 10% шанс краша при коэффициентах 1 - 1.1
+    }
+    
     if (lastValue < 1.5) return lastValue;
     const crashChance = 0.02 + (lastValue - 1.5) * 0.1;
     return Math.random() < crashChance ? 0 : lastValue;
   };
+  
 
   useEffect(() => {
     if (isCrashed || isWithdrawn || !gameStarted) return;
