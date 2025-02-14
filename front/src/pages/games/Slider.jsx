@@ -14,21 +14,19 @@ const SliderGame = () => {
   const [erasedPercentage, setErasedPercentage] = useState(0);
   const [isErasing, setIsErasing] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), async (currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
         setUserId(currentUser.uid);
         try {
           const [storedBalance, storedCoins] = await Promise.all([
             getBalance(currentUser.uid),
             getCoins(currentUser.uid)
           ]);
-          setMiningData({ balance: storedBalance, coins: storedCoins });
+          setMiningData({ balance: storedBalance.toFixed(2), coins: storedCoins });
         } catch (error) {
           console.error("Ошибка загрузки данных:", error);
         } finally {
@@ -182,43 +180,14 @@ const SliderGame = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-50">
-      {/* Уменьшённый заголовок */}
-      <h2
-        className="font-bold text-gray-800 mb-6 text-center"
-        style={{ fontSize: 'calc(1rem + 1vw)' }}
-      >
-        Заработайте PencilCoins, стирая!
-      </h2>
-      {/* Уменьшённые параграфы */}
-      <p
-        className="mb-4 text-gray-800"
-        style={{ fontSize: 'calc(0.8rem + 0.5vw)' }}
-      >
-        Ваши монеты: {miningData.balance}
-      </p>
-      <p
-        className="mb-4 text-gray-800"
-        style={{ fontSize: 'calc(0.8rem + 0.5vw)' }}
-      >
-        Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}
-      </p>
+      <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
+      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance}</p>
+      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}</p>
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
-        <div
-          className="bg-yellow-400 h-4 rounded-full"
-          style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }}
-        />
+        <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }} />
       </div>
-      <p
-        className="mb-4 text-gray-800"
-        style={{ fontSize: 'calc(0.8rem + 0.5vw)' }}
-      >
-        Прогресс: {Math.min((erasedPercentage * 1.25).toFixed(2), 100)}% / 100%
-      </p>
-      <canvas
-        ref={canvasRef}
-        className="border border-black bg-gray-300"
-        style={{ width: '90%', height: '50%' }}
-      />
+      <p className="text-xl mb-4 text-gray-800">Прогресс: {Math.min((erasedPercentage * 1.25).toFixed(2), 100)}% / 100%</p>
+      <canvas ref={canvasRef} className="border border-black bg-gray-300" style={{ width: '90%', height: '60%' }} />
     </div>
   );
 };

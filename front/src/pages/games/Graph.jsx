@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getBalance, updateBalance } from "../../components/firebase";
 import Button from "../../components/ui/button";
 import Input from "../../components/ui/input";
+import { motion } from "framer-motion";
 
 const LuckyJetGame = () => {
   const [data, setData] = useState([{ time: 0, value: 1 }]);
@@ -11,6 +12,7 @@ const LuckyJetGame = () => {
   const [userId, setUserId] = useState(null);
   const [balance, setBalance] = useState(0);
   const [prediction, setPrediction] = useState(null);
+  const [isBtactive, setBtactive] = useState(true);
   const [isCrashed, setIsCrashed] = useState(false);
   const [isWithdrawn, setIsWithdrawn] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
@@ -42,7 +44,7 @@ const LuckyJetGame = () => {
   
   const generateCrash = (lastValue) => {
     if (lastValue >= 1 && lastValue <= 1.1) {
-      return Math.random() < 0.01 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
+      return Math.random() < 0.02 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
     }
   
     if (lastValue > 1.1 && lastValue <= 3) {
@@ -110,6 +112,7 @@ const LuckyJetGame = () => {
     setIsWithdrawn(false);
     setGameStarted(true);
     setCurrentCoefficient(null);
+    setBtactive(false)
   };
 
   const withdraw = () => {
@@ -124,6 +127,8 @@ const LuckyJetGame = () => {
     updateBalance(userId, newBalance);
 
     setIsWithdrawn(true);
+    setGameStarted(false);
+    setBtactive(true);
   };
 
   const resetGraph = () => {
@@ -134,6 +139,7 @@ const LuckyJetGame = () => {
     setAutoWithdraw(false);
     setCurrentCoefficient(null);
     setPrediction(null);
+    setBtactive(true);
   };
   
 
@@ -146,7 +152,17 @@ const LuckyJetGame = () => {
   }
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 via-blue-600 to-blue-800 flex items-center justify-center p-8">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl">
+    <motion.div
+      className="absolute top-10 left-0 w-96 h-32 bg-white opacity-70 rounded-full blur-lg"
+      animate={{ x: ["-100%", "140%"], y: [20, 0, -2000] }}
+      transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+    />
+    <motion.div
+      className="absolute bottom-10 right-0 w-80 h-28 bg-white opacity-70 rounded-full blur-lg"
+      animate={{ x: ["120%", "-20%"], y: [-20, 0, 20] }}
+      transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+    />
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl  z-50">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Graph Game</h1>
         <p className="text-center text-xl font-semibold mb-4 text-gray-700">
           Баланс: <span className="text-indigo-600">{Number(balance).toFixed(2)}</span> коинов
@@ -238,7 +254,7 @@ const LuckyJetGame = () => {
               Забрать {currentCoefficient}X (+{(currentCoefficient * prediction.betAmount).toFixed(2)})
             </Button>
           )}
-          {!isCrashed && !gameStarted && (
+          {isBtactive && (
             <Button
               onClick={placeBet}
               className="w-full max-w-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg"

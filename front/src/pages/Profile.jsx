@@ -12,6 +12,25 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const newParticle = {
+        id: Math.random(),
+        x: e.clientX,
+        y: e.clientY,
+      };
+      setParticles((prev) => [...prev, newParticle]);
+
+      setTimeout(() => {
+        setParticles((prev) => prev.filter((p) => p.id !== newParticle.id));
+      }, 1000);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -25,7 +44,7 @@ const Profile = () => {
       try {
         const [userBalance, topUsers] = await Promise.all([getBalance(currentUser.uid), getLeaderboard()]);
 
-        setBalance(userBalance);
+        setBalance(userBalance.toFixed(2));
         setLeaderboard(topUsers);
 
         const rank = topUsers.findIndex(u => u.uid === currentUser.uid);
@@ -58,8 +77,26 @@ const Profile = () => {
     );
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 md:px-8">
+  return (    
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 md:px-8">    
+    <div className="pointer-events-none fixed top-0 left-0 w-full h-full overflow-hidden">
+          {particles.map((particle) => (
+          <motion.img
+            key={particle.id}
+            src="pencil.png"
+            alt="ton"
+            className="w-6 h-6 absolute"
+            initial={{ opacity: 1, scale: 1 }}
+            animate={{
+              opacity: 0,
+              scale: 2,
+              y: [0, -30],
+            }}
+            transition={{ duration: 1 }}
+            style={{ left: particle.x, top: particle.y }}
+          />
+        ))}
+      </div>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {user && (
         <motion.div
