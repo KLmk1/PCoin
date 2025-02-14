@@ -154,7 +154,7 @@ const LuckyJetGame = () => {
     <div className="min-h-screen bg-gradient-to-r from-blue-400 via-blue-600 to-blue-800 flex items-center justify-center p-8">
     <motion.div
       className="absolute top-10 left-0 w-96 h-32 bg-white opacity-70 rounded-full blur-lg"
-      animate={{ x: ["-100%", "140%"], y: [20, 0, -2000] }}
+      animate={{ x: ["-100%", "140%"], y: [20, 0, -20] }}
       transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
     />
     <motion.div
