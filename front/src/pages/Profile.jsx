@@ -153,7 +153,7 @@ const Profile = () => {
         {user && userRank > 10 && (
           <div className="mt-4 p-2 bg-yellow-100 rounded-lg">
             <p className="font-bold">Вы: #{userRank}</p>
-            <p>Баланс: {balance} 💰</p>
+            <p>Баланс: {balance.toFixed(2)} 💰</p>
           </div>
         )}
       </motion.div>

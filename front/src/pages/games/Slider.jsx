@@ -26,7 +26,7 @@ const SliderGame = () => {
             getBalance(currentUser.uid),
             getCoins(currentUser.uid)
           ]);
-          setMiningData({ balance: storedBalance.toFixed(2), coins: storedCoins });
+          setMiningData({ balance: storedBalance, coins: storedCoins });
         } catch (error) {
           console.error("Ошибка загрузки данных:", error);
         } finally {
@@ -125,7 +125,7 @@ const SliderGame = () => {
           setMiningData(prevData => ({
             ...prevData,
             coins: newCoins,
-            balance: prevData.balance + 1
+            balance: Number(prevData.balance) + 1
           }));
 
           updateCoins(userId, newCoins);
