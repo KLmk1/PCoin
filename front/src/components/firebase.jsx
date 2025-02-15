@@ -64,7 +64,7 @@ export const getBalance = async (userId) => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      return Number(userDoc.data().balance).toFixed(2) || 0; // Возвращаем баланс, если документ существует
+      return userDoc.data().balance || 0; // Возвращаем баланс, если документ существует
     } else {
       // Если документ не существует, создаем его с балансом 0
       await setDoc(userRef, { balance: 0 });
