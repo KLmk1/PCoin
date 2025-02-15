@@ -159,7 +159,7 @@ export const getLeaderboard = async () => {
     return querySnapshot.docs.map(doc => ({
       uid: doc.id,
       name: doc.data().name || "Аноним",
-      balance: doc.data().balance || 0
+      balance: Number(Number(doc.data().balance).toFixed()) || 0
     }));
   } catch (error) {
     console.error("Ошибка получения лидерборда:", error);
