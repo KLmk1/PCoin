@@ -165,7 +165,7 @@ const LuckyJetGame = () => {
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl  z-50">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Graph Game</h1>
         <p className="text-center text-xl font-semibold mb-4 text-gray-700">
-          Баланс: <span className="text-indigo-600">{Number(balance).toFixed(2)}</span> коинов
+          Баланс: <span className="text-indigo-600">{Number(balance).toFixed(2)}</span> <img src="pencil.png" alt="pencil" className="h-5 inline-block" />
         </p>
 
         <div className="flex justify-center mb-8">
@@ -251,7 +251,7 @@ const LuckyJetGame = () => {
           )}
           {!isCrashed && !isWithdrawn && prediction && currentCoefficient && (
             <Button onClick={withdraw} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg">
-              Забрать {currentCoefficient}X (+{(currentCoefficient * prediction.betAmount).toFixed(2)})
+              Забрать {currentCoefficient}X (+{(currentCoefficient * prediction.betAmount).toFixed(2)} ) <img src="pencil.png" alt="pencil" className="h-5 inline-block" />
             </Button>
           )}
           {isBtactive && (

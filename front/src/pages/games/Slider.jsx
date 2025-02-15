@@ -181,8 +181,8 @@ const SliderGame = () => {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-50">
       <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Заработайте PencilCoins, стирая!</h2>
-      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance}</p>
-      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS}</p>
+      <p className="text-xl mb-4 text-gray-800">Ваши монеты: {miningData.balance} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /></p>
+      <p className="text-xl mb-4 text-gray-800">Доступные монеты: {Math.max(MAX_COINS - miningData.coins, 0)} / {MAX_COINS} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /></p>
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
         <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }} />
       </div>

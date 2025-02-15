@@ -115,7 +115,7 @@ const Profile = () => {
             {user.displayName || "Аноним"}
           </h2>
           <p className="text-lg text-gray-600">Email: {user.email}</p>
-          <p className="text-lg text-gray-600 mb-4">Баланс: {balance} PencilCoins</p>
+          <p className="text-lg text-gray-600 mb-4">Баланс: {balance} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /> </p>
           <motion.button
             onClick={handleSignOut}
             className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-400 transition duration-300"
@@ -144,7 +144,7 @@ const Profile = () => {
               transition={{ duration: 0.3, delay: index * 0.1 }} // Staggered animation
             >
               <span>#{index + 1} {entry.name || "Аноним"}</span>
-              <span>{entry.balance} 💰</span>
+              <span>{entry.balance} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /></span>
             </motion.div>
           ))
         ) : (
@@ -153,7 +153,7 @@ const Profile = () => {
         {user && userRank > 10 && (
           <div className="mt-4 p-2 bg-yellow-100 rounded-lg">
             <p className="font-bold">Вы: #{userRank}</p>
-            <p>Баланс: {balance.toFixed(2)} 💰</p>
+            <p>Баланс: {balance.toFixed(2)} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /></p>
           </div>
         )}
       </motion.div>
