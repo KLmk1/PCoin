@@ -5,6 +5,7 @@ import { getBalance, updateBalance } from "../../components/firebase";
 import Button from "../../components/ui/button";
 import Input from "../../components/ui/input";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const LuckyJetGame = () => {
   const [data, setData] = useState([{ time: 0, value: 1 }]);
@@ -20,6 +21,7 @@ const LuckyJetGame = () => {
   const [currentCoefficient, setCurrentCoefficient] = useState(null);
   const [autoWithdrawCoefficient, setAutoWithdrawCoefficient] = useState();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), async (currentUser) => {
@@ -33,6 +35,8 @@ const LuckyJetGame = () => {
           console.error("Ошибка загрузки данных:", error);
         } finally {
           setLoading(false);}
+      } else {
+        navigate("/auth/signin");
       }
     });
     return () => unsubscribe();

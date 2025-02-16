@@ -23,15 +23,59 @@ const provider = new GoogleAuthProvider();
  * Вход через Google.
  * @returns {Promise<User>} Объект пользователя Firebase.
  */
-export const signInWithGoogle = async () => {
+export const SignInWithGoogle = async (nickname) => {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    console.log('User signed in:', user);
-    return user;
+    const userRef = doc(db, "users", user.uid);
+
+    const userDoc = await getDoc(userRef);
+    
+    if (userDoc.exists()) {
+      await signOut(auth);
+      return { error: "Аккаунт уже существует. Используйте LogIn." };
+    }
+
+    await setDoc(userRef, {
+      name: nickname,
+      balance: 0,
+      coins: 0
+    });
+
+    return { user };
   } catch (error) {
-    console.error('Error signing in with Google:', error.message);
-    throw error;
+    await signOut(auth);
+    return { error: error.message };
+  }
+};
+
+export const LogInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const userRef = doc(db, "users", user.uid);
+
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      await signOut(auth);
+      return { error: "Аккаунт не существует. Используйте SignIn." };
+    }
+
+    return { user };
+  } catch (error) {
+    await signOut(auth);
+    return { error: error.message };
+  }
+};
+
+export const updateUserName = async (userId, newName) => {
+  if (!userId || !newName) return;
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { name: newName });
+  } catch (error) {
+    console.error("Ошибка обновления имени:", error);
   }
 };
 
@@ -64,7 +108,7 @@ export const getBalance = async (userId) => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      return Number(Number(userDoc.data().balance).toFixed(2)) || 0; // Возвращаем баланс, если документ существует
+      return parseFloat(userDoc.data().balance.toFixed(2)) || 0;
     } else {
       // Если документ не существует, создаем его с балансом 0
       await setDoc(userRef, { balance: 0 });

@@ -3,6 +3,7 @@ import { auth, logOut, getBalance, getLeaderboard, getUserRank } from "../compon
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { updateUserName } from "../components/firebase";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -13,6 +14,10 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [particles, setParticles] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState(user?.displayName || "");
+  const [errorn, setErrorn] = useState(null);
+  
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -35,7 +40,7 @@ const Profile = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
-        navigate("/auth");
+        navigate("/auth/signin");
         return;
       }
 
@@ -60,10 +65,46 @@ const Profile = () => {
     return () => unsubscribe();
   }, [navigate]);
 
+  const handleNameChange = async () => {
+    const trimmedName = newName.trim();
+  
+    if (!trimmedName) {
+      setErrorn("Введите ник перед входом.");
+      return;
+    }
+  
+    if (trimmedName.length < 3) {
+      setErrorn("Никнейм должен содержать минимум 3 символа.");
+      return;
+    }
+  
+    if (trimmedName.length > 15) {
+      setErrorn("Никнейм должен содержать максимум 15 символов.");
+      return;
+    }
+  
+    const nicknameRegex = /^[a-zA-Z0-9_а-яА-я]+$/; // Только буквы, цифры и "_"
+    if (!nicknameRegex.test(trimmedName)) {
+      setErrorn("Никнейм может содержать только буквы, цифры и _.");
+      return;
+    }
+  
+    try {
+      await updateUserName(user.uid, trimmedName);
+      setUser({ ...user, displayName: trimmedName }); // Обновляем локальное состояние
+      setErrorn(null); // Очищаем ошибки
+      setIsEditing(false);
+    } catch (error) {
+      setErrorn("Ошибка обновления никнейма. Попробуйте снова.");
+      console.errorn("Ошибка изменения имени:", error);
+    }
+  };
+  
+  
   const handleSignOut = useCallback(async () => {
     try {
       await logOut();
-      navigate("/auth");
+      navigate("/auth/signin");
     } catch (err) {
       setError(`Ошибка выхода: ${err.message}`);
     }
@@ -110,10 +151,26 @@ const Profile = () => {
             alt="Profile"
             className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-4 mx-auto"
             whileHover={{ scale: 1.1 }}
-          />
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            {user.displayName || "Аноним"}
-          </h2>
+          />          
+          <div className="flex items-center justify-center">
+            {isEditing ? (
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="border px-2 py-1 rounded-lg text-black"
+              />
+            ) : (
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">{user.displayName || "Аноним"}</h2>
+            )}
+            <button
+              onClick={() => (isEditing ? handleNameChange() : setIsEditing(true))}
+              className="ml-2 text-blue-500 hover:text-blue-700"
+            >
+              {isEditing ? "✅" : "✏️"}
+            </button>
+          </div>
+          {errorn && <p className="text-red-500 mb-4 block">{errorn}</p>}
           <p className="text-lg text-gray-600">Email: {user.email}</p>
           <p className="text-lg text-gray-600 mb-4">Баланс: {balance} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /> </p>
           <motion.button
@@ -153,7 +210,7 @@ const Profile = () => {
         {user && userRank > 10 && (
           <div className="mt-4 p-2 bg-yellow-100 rounded-lg">
             <p className="font-bold">Вы: #{userRank}</p>
-            <p>Баланс: {balance.toFixed(2)} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /></p>
+            <p>Баланс: {balance} <img src="pencil.png" alt="pencil" className="h-5 inline-block" /></p>
           </div>
         )}
       </motion.div>

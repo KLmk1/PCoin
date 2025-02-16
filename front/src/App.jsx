@@ -1,11 +1,12 @@
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
-import Auth from "./pages/Auth";
 import Error from "./pages/404";
 import MiniGames from "./pages/Mining";
 import SliderGame from "./pages/games/slider";
 import GraphGame from "./pages/games/Graph";
+import LoginPage from "./pages/auth/Login";
+import SigninPage from "./pages/auth/Signin";
 
 const App = () => {
   return (
@@ -35,7 +36,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/signin" element={<SigninPage />} />
           <Route path="/mining" element={<MiniGames />} />
           <Route path="/mining/slider" element={<SliderGame />} />
           <Route path="/mining/graph" element={<GraphGame />} />

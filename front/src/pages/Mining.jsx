@@ -1,6 +1,21 @@
 import { Link } from "react-router-dom";
+import { useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useNavigate } from "react-router-dom";
 
 const GameSelection = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(getAuth(), async (currentUser) => {
+      if (!currentUser) {
+        navigate("/auth/signin");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
   const games = [
     { 
       name: "Slider Game", 

@@ -33,7 +33,7 @@ const SliderGame = () => {
           setLoading(false);
         }
       } else {
-        navigate("/auth");
+        navigate("/auth/signin");
       }
     });
 

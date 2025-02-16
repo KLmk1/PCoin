@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const fixedPositions = [
   { top: "5%", left: "15%" },
@@ -66,7 +67,20 @@ const Home = () => {
             }}
           />
         ))}
-      </div>
+      </div>            
+      <footer className="absolute inset-x-0 bottom-0  w-full h-16 overflow-hidden flex items-center">
+      {[...Array(25)].map((_, i) => (
+        <motion.img
+          key={i}
+          src="pencil.png"
+          alt="Pencil"
+          className="h-10 absolute left-0 z-50"
+          initial={{ x: `${-10 * i}vh` }} // Начальная позиция за левым краем
+          animate={{ x: "200vh" }} // Движение вправо
+          transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
+        />
+      ))}
+      </footer>
     </div>
   );
 };
