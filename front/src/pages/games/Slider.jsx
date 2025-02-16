@@ -186,7 +186,7 @@ const SliderGame = () => {
       <div className="w-1/3 bg-gray-200 rounded-full h-4 mb-4 inline-block">
         <div className="bg-yellow-400 h-4 rounded-full" style={{ width: `${Math.min(erasedPercentage * 1.25, 100)}%` }} />
       </div>
-      <canvas ref={canvasRef} className="border border-black bg-gray-300 w-3/4 h-1/2" />
+      <canvas ref={canvasRef} className="border border-black bg-gray-300" style={{ width: '80%', height: '60%' }} />
     </div>
   );
 };
