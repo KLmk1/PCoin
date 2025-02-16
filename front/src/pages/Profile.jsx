@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { auth, logOut, getBalance, getLeaderboard, getUserRank } from "../components/firebase";
+import { auth, logOut, getBalance, getLeaderboard, getUserRank, getName } from "../components/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import { updateUserName } from "../components/firebase";
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
+  const [name, setName] = useState('');
   const [leaderboard, setLeaderboard] = useState([]);
   const [userRank, setUserRank] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,10 +48,11 @@ const Profile = () => {
       setUser(currentUser);
 
       try {
-        const [userBalance, topUsers] = await Promise.all([getBalance(currentUser.uid), getLeaderboard()]);
+        const [userBalance, topUsers, userName] = await Promise.all([getBalance(currentUser.uid), getLeaderboard(), getName(currentUser.uid)]);
 
         setBalance(userBalance.toFixed(2));
         setLeaderboard(topUsers);
+        setName(userName);
 
         const rank = topUsers.findIndex(u => u.uid === currentUser.uid);
         setUserRank(rank !== -1 ? rank + 1 : await getUserRank(currentUser.uid));
@@ -91,14 +93,27 @@ const Profile = () => {
   
     try {
       await updateUserName(user.uid, trimmedName);
-      setUser({ ...user, displayName: trimmedName }); // Обновляем локальное состояние
-      setErrorn(null); // Очищаем ошибки
+      
+      // Обновляем локальное состояние
+      setName(trimmedName);
+      setUser({ ...user, displayName: trimmedName });
+  
+      // Обновляем никнейм в лидерборде
+      setLeaderboard((prevLeaderboard) =>
+        prevLeaderboard.map((entry) =>
+          entry.uid === user.uid ? { ...entry, name: trimmedName } : entry
+        )
+      );
+  
+      setErrorn(null);
       setIsEditing(false);
     } catch (error) {
       setErrorn("Ошибка обновления никнейма. Попробуйте снова.");
-      console.errorn("Ошибка изменения имени:", error);
+      console.error("Ошибка изменения имени:", error);
     }
   };
+  
+  
   
   
   const handleSignOut = useCallback(async () => {
@@ -161,7 +176,7 @@ const Profile = () => {
                 className="border px-2 py-1 rounded-lg text-black"
               />
             ) : (
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">{user.displayName || "Аноним"}</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">{name || "Аноним"}</h2>
             )}
             <button
               onClick={() => (isEditing ? handleNameChange() : setIsEditing(true))}

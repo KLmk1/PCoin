@@ -120,6 +120,29 @@ export const getBalance = async (userId) => {
   }
 };
 
+export const getName = async (userId) => {
+  if (!userId) {
+    console.error('User ID is required');
+    return 0;
+  }
+
+  try {
+    const userRef = doc(db, "users", userId); // Ссылка на документ пользователя
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      return userDoc.data().name || "Аноним";
+    } else {
+      // Если документ не существует, создаем его с балансом 0
+      await setDoc(userRef, { name : doc.data().name });
+      return 0;
+    }
+  } catch (error) {
+    console.error('Ошибка при получении имени:', error);
+    return 0;
+  }
+};
+
 /**
  * Обновление баланса пользователя.
  * @param {string} userId - Идентификатор пользователя.
@@ -203,7 +226,7 @@ export const getLeaderboard = async () => {
     return querySnapshot.docs.map(doc => ({
       uid: doc.id,
       name: doc.data().name || "Аноним",
-      balance: Number(Number(doc.data().balance).toFixed()) || 0
+      balance: doc.data().balance.toFixed() || 0
     }));
   } catch (error) {
     console.error("Ошибка получения лидерборда:", error);
