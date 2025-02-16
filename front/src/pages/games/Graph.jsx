@@ -156,16 +156,39 @@ const LuckyJetGame = () => {
   }
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 via-blue-600 to-blue-800 flex items-center justify-center p-8">
-    <motion.div
-      className="absolute top-10 left-0 w-96 h-32 bg-white opacity-70 rounded-full blur-lg"
-      animate={{ x: ["-100%", "140%"], y: [20, 0, -20] }}
-      transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-    />
-    <motion.div
-      className="absolute bottom-10 right-0 w-80 h-28 bg-white opacity-70 rounded-full blur-lg"
-      animate={{ x: ["120%", "-20%"], y: [-20, 0, 20] }}
-      transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-    />
+        <motion.div
+          className="absolute top-20 left-0 w-96 h-32 bg-white opacity-70 rounded-full blur-lg"
+          animate={{ 
+            x: ["-50vh", "200vh"], 
+            y: [0, -20, 0, 10, 0] // Покачивание вверх-вниз
+          }}
+          transition={{ 
+            x: { duration: 35, repeat: Infinity, ease: "linear" },
+            y: { duration: 3, repeat: Infinity, ease: "easeInOut" } // Независимая анимация покачивания
+          }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-0 w-90 h-28 bg-white opacity-70 rounded-full blur-lg"
+          animate={{ 
+            x: ["80vh", "-200vh"], 
+            y: [0, 15, 0, -10, 0] // Покачивание вверх-вниз
+          }}
+          transition={{ 
+            x: { duration: 30, repeat: Infinity, ease: "linear" },
+            y: { duration: 3, repeat: Infinity, ease: "easeInOut" } // Независимая анимация покачивания
+          }}
+        />        
+        <motion.div
+        className="absolute bottom-120 right-0 w-60 h-28 bg-white opacity-70 rounded-full blur-lg"
+        animate={{ 
+          x: ["30vh", "-200vh"], 
+          y: [0, 10, 0, -15, 0] // Покачивание вверх-вниз
+        }}
+        transition={{ 
+          x: { duration: 20, repeat: Infinity, ease: "linear" },
+          y: { duration: 3, repeat: Infinity, ease: "easeInOut" } // Независимая анимация покачивания
+        }}
+      />
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl  z-50">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Graph Game</h1>
         <p className="text-center text-xl font-semibold mb-4 text-gray-700">
