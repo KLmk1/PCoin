@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { XAxis, YAxis, CartesianGrid, AreaChart, ResponsiveContainer, Scatter, Text, Area, LabelList } from "recharts";
+import { XAxis, YAxis, CartesianGrid, AreaChart, ResponsiveContainer, Scatter, Area, LabelList } from "recharts";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getBalance, updateBalance } from "../../components/firebase";
 import Button from "../../components/ui/button";
@@ -69,7 +69,7 @@ const LuckyJetGame = () => {
         return Math.random() < crashChance ? 0 : lastValue;
       }
     } 
-    if (type > 0.3 && !isWithdrawn) {
+    if (type > 0.2 && !isWithdrawn) {
       if (lastValue >= 1 && lastValue <= 1.1) {
         return Math.random() < 0.03 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
       }
@@ -83,7 +83,7 @@ const LuckyJetGame = () => {
         const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
         return Math.random() < crashChance ? 0 : lastValue;
       }
-    } else if (type <= 0.3 && !isWithdrawn) {
+    } else if (type <= 0.2 && !isWithdrawn) {
       console.warn("KAIF!");
       if (lastValue < 5) {
         return lastValue;
