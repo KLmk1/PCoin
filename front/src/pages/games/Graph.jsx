@@ -24,6 +24,7 @@ const LuckyJetGame = () => {
   const [loading, setLoading] = useState(true);
   const [betHistory, setBetHistory] = useState([]);
   const [getCoef, setCoef] = useState(null);
+  const [isgoup, setGoup] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,25 +54,10 @@ const LuckyJetGame = () => {
     return Math.random(); // Ускоряем рост со временем
   };
   
+useEffect(() => {
   const generateCrash = (lastValue, type) => {
-    if (!isWithdrawn) {
-      console.warn(isWithdrawn);
-      if (lastValue > 1 && lastValue <= 1.1) {
-        return Math.random() < 0.03 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
-      }
-    
-      if (lastValue > 1.1 && lastValue <= 3) {
-        const crashChance = 0.005 + lastValue * 0.01; // Плавный рост вероятности краша
-        return Math.random() < crashChance ? 0 : lastValue;
-      }
-    
-      if (lastValue > 3) {
-        const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
-        return Math.random() < crashChance ? 0 : lastValue;
-      }
-    } 
-    if (type > 0.2 && isWithdrawn) {
-      console.warn(isWithdrawn);
+    if (type > 0.2 || !isWithdrawn) {
+      console.warn(isgoup);
       if (lastValue >= 1 && lastValue <= 1.1) {
         return Math.random() < 0.03 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
       }
@@ -85,8 +71,8 @@ const LuckyJetGame = () => {
         const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
         return Math.random() < crashChance ? 0 : lastValue;
       }
-    } else if (type <= 0.2 && isWithdrawn) {
-      console.warn(isWithdrawn);
+    } else {
+      console.log("caca");
       if (lastValue < 5) {
         return lastValue;
       } else if (lastValue > 10 && lastValue < 20) {
@@ -98,6 +84,7 @@ const LuckyJetGame = () => {
       }
     }
   }
+}, [isWithdrawn])
 
   useEffect(() => {
     let type = generateType();  
@@ -156,22 +143,24 @@ const LuckyJetGame = () => {
     setIsCrashed(false);
     setGameStarted(true);
     setCurrentCoefficient(null);
-    setBtactive(false)
-    
+    setBtactive(false);
     setIsWithdrawn(false);
+    
+    setGoup(false);
   };
 
   const withdraw = () => {
-
+    if (isCrashed || isWithdrawn) return; // Не даем вывести дважды или после краша
+    
     const finalValue = data[data.length - 1].value;
     const coefficient = finalValue / prediction.startValue;
     const winAmount = prediction.betAmount * coefficient;
     const newBalance = balance + winAmount;
 
+    setGoup(true);
     setBalance(newBalance);
     updateBalance(userId, newBalance);
     setIsWithdrawn(true);
-
   };
 
   useEffect(() => {
