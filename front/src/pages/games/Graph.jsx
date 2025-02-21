@@ -54,7 +54,8 @@ const LuckyJetGame = () => {
   };
   
   const generateCrash = (lastValue, type) => {
-    if (isWithdrawn) {
+    if (!isWithdrawn) {
+      console.warn(isWithdrawn);
       if (lastValue > 1 && lastValue <= 1.1) {
         return Math.random() < 0.03 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
       }
@@ -69,7 +70,8 @@ const LuckyJetGame = () => {
         return Math.random() < crashChance ? 0 : lastValue;
       }
     } 
-    if (type > 0.2 && !isWithdrawn) {
+    if (type > 0.2 && isWithdrawn) {
+      console.warn(isWithdrawn);
       if (lastValue >= 1 && lastValue <= 1.1) {
         return Math.random() < 0.03 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
       }
@@ -83,8 +85,8 @@ const LuckyJetGame = () => {
         const crashChance = 0.02 + lastValue * 0.015; // Ускоренный рост вероятности краша
         return Math.random() < crashChance ? 0 : lastValue;
       }
-    } else if (type <= 0.2 && !isWithdrawn) {
-      console.warn("KAIF!");
+    } else if (type <= 0.2 && isWithdrawn) {
+      console.warn(isWithdrawn);
       if (lastValue < 5) {
         return lastValue;
       } else if (lastValue > 10 && lastValue < 20) {
@@ -152,14 +154,14 @@ const LuckyJetGame = () => {
     setData([{ time: 0, value: 1 }]);
     setPrediction({ startValue: 1, betAmount: bet });
     setIsCrashed(false);
-    setIsWithdrawn(false);
     setGameStarted(true);
     setCurrentCoefficient(null);
     setBtactive(false)
+    
+    setIsWithdrawn(false);
   };
 
   const withdraw = () => {
-    if (!prediction || isWithdrawn) return;
 
     const finalValue = data[data.length - 1].value;
     const coefficient = finalValue / prediction.startValue;
@@ -181,7 +183,6 @@ const LuckyJetGame = () => {
 
   const resetGraph = () => {
     setIsCrashed(false);
-    setIsWithdrawn(false);
     setGameStarted(false);
     setData([{ time: 0, value: 1 }]);
     setAutoWithdraw(false);
