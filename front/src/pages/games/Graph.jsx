@@ -54,9 +54,8 @@ const LuckyJetGame = () => {
     return Math.random(); // Ускоряем рост со временем
   };
   
-useEffect(() => {
   const generateCrash = (lastValue, type) => {
-    if (type > 0.2 || !isWithdrawn) {
+    if (type > 0.2 || !isWithdrawn && prediction) {
       console.warn(isgoup);
       if (lastValue >= 1 && lastValue <= 1.1) {
         return Math.random() < 0.03 ? 0 : lastValue; // 1% шанс краша на низких коэффициентах
@@ -84,7 +83,6 @@ useEffect(() => {
       }
     }
   }
-}, [isWithdrawn])
 
   useEffect(() => {
     let type = generateType();  
@@ -144,14 +142,14 @@ useEffect(() => {
     setGameStarted(true);
     setCurrentCoefficient(null);
     setBtactive(false);
+    
     setIsWithdrawn(false);
     
     setGoup(false);
   };
 
   const withdraw = () => {
-    if (isCrashed || isWithdrawn) return; // Не даем вывести дважды или после краша
-    
+
     const finalValue = data[data.length - 1].value;
     const coefficient = finalValue / prediction.startValue;
     const winAmount = prediction.betAmount * coefficient;

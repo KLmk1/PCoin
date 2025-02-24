@@ -1,4 +1,4 @@
-import { getFirestore, updateDoc, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { getFirestore, updateDoc, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit, deleteDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
@@ -286,4 +286,58 @@ export const getDailyUsageCount = async (userId) => {
 export const updateDailyUsageCount = async (userId, usageCount) => {
   const userRef = doc(db, "users", userId);
   await updateDoc(userRef, { dailyUsageCount: usageCount });
+};
+
+export const createPromoCode = async (promoCode, bonusAmount) => {
+  const promoRef = doc(db, "promoCodes", promoCode);
+
+  try {
+    const promoSnap = await getDoc(promoRef);
+    if (promoSnap.exists()) {
+      return { success: false, message: "Промокод уже существует!" };
+    }
+
+    await setDoc(promoRef, {
+      bonus: bonusAmount,
+      createdAt: new Date(),
+    });
+
+    return { success: true, message: `Промокод "${promoCode}" создан с бонусом ${bonusAmount}!` };
+  } catch (error) {
+    console.error("Ошибка создания промокода:", error);
+    return { success: false, message: "Ошибка при создании промокода." };
+  }
+};
+
+export const applyPromoCode = async (uid, promoCode) => {
+  const promoRef = doc(db, "promoCodes", promoCode);
+  const userRef = doc(db, "users", uid);
+
+  try {
+    // Получаем данные о промокоде
+    const promoSnap = await getDoc(promoRef);
+    if (!promoSnap.exists()) {
+      return { success: false, message: "Промокод не найден или уже использован!" };
+    }
+
+    const promoData = promoSnap.data();
+    const bonus = promoData.bonus || 0;
+
+    // Начисляем бонус пользователю
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      return { success: false, message: "Пользователь не найден!" };
+    }
+
+    const currentBalance = userSnap.data().balance || 0;
+    await updateDoc(userRef, { balance: currentBalance + bonus });
+
+    // Удаляем промокод из Firestore, чтобы он больше не был доступен
+    await deleteDoc(promoRef);
+
+    return { success: true, newBalance: currentBalance + bonus, message: `Промокод "${promoCode}" успешно активирован!` };
+  } catch (error) {
+    console.error("Ошибка при активации промокода:", error);
+    return { success: false, message: "Ошибка сервера." };
+  }
 };

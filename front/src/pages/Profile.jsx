@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { auth, logOut, getBalance, getLeaderboard, getUserRank, getName } from "../components/firebase";
+import { auth, logOut, getBalance, getLeaderboard, getUserRank, getName, applyPromoCode } from "../components/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -18,6 +18,9 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(user?.displayName || "");
   const [errorn, setErrorn] = useState(null);
+  const [promoCode, setPromoCode] = useState(""); // Промокод из инпута
+  const [promoMessage, setPromoMessage] = useState(null); // Сообщение об ошибке или успехе
+
   
 
   useEffect(() => {
@@ -111,6 +114,27 @@ const Profile = () => {
       setErrorn("Ошибка обновления никнейма. Попробуйте снова.");
       console.error("Ошибка изменения имени:", error);
     }
+  };  
+  
+  // Функция для ввода промокода
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoMessage("Введите промокод!");
+      return;
+    }
+
+    try {
+      const result = await applyPromoCode(user.uid, promoCode.trim());
+      if (result.success) {
+        setBalance(result.newBalance);
+        setPromoMessage("Промокод успешно активирован!");
+      } else {
+        setPromoMessage(result.message); // Ошибка (например, уже использован)
+      }
+    } catch (error) {
+      console.error("Ошибка активации промокода:", error);
+      setPromoMessage("Ошибка сервера. Попробуйте позже.");
+    }
   };
   
   
@@ -196,7 +220,24 @@ const Profile = () => {
             Выйти
           </motion.button>
         </motion.div>
-      )}
+      )}          
+      <div className="mb-4">
+        <input
+          type="text"
+          value={promoCode}
+          onChange={(e) => setPromoCode(e.target.value)}
+          className="border px-2 py-1 rounded-lg text-black"
+          placeholder="Введите промокод"
+        />
+        <button
+          onClick={handleApplyPromo}
+          className="ml-2 bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-600 transition"
+        >
+          Активировать
+        </button>
+      </div>
+      {promoMessage && <p className="text-red-500">{promoMessage}</p>}
+
 
       {/* Лидерборд */}
       <motion.div
