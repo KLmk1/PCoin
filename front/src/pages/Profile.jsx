@@ -137,9 +137,6 @@ const Profile = () => {
     }
   };
   
-  
-  
-  
   const handleSignOut = useCallback(async () => {
     try {
       await logOut();
@@ -159,7 +156,7 @@ const Profile = () => {
 
   return (    
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 sm:px-6 md:px-8">    
-    <div className="pointer-events-none fixed top-0 left-0 w-full h-full overflow-hidden">
+      <div className="pointer-events-none fixed top-0 left-0 w-full h-full overflow-hidden">
           {particles.map((particle) => (
           <motion.img
             key={particle.id}
@@ -220,24 +217,45 @@ const Profile = () => {
             Выйти
           </motion.button>
         </motion.div>
-      )}          
-      <div className="mb-4">
-        <input
-          type="text"
-          value={promoCode}
-          onChange={(e) => setPromoCode(e.target.value)}
-          className="border px-2 py-1 rounded-lg text-black"
-          placeholder="Введите промокод"
-        />
-        <button
-          onClick={handleApplyPromo}
-          className="ml-2 bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-600 transition"
+      )}      
+      
+      {user && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center bg-white p-6 rounded-xl shadow-md w-full mt-5 sm:w-96"
         >
-          Активировать
-        </button>
-      </div>
-      {promoMessage && <p className="text-red-500">{promoMessage}</p>}
-
+        <div className="space-x-8">
+          <motion.input
+            type="text"
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            className="border-2 border-blue-500 focus:border-blue-700 focus:ring-2 focus:ring-blue-300 outline-none px-4 py-2 rounded-lg text-black transition duration-300 w-60"
+            placeholder="Промокод"
+            whileFocus={{ scale: 1.05 }}
+          />
+          <motion.button
+            onClick={handleApplyPromo}
+            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition duration-300 shadow-md"
+            whileTap={{ scale: 0.9 }}
+          >
+            🎟 
+          </motion.button>
+        </div>
+      </motion.div>
+        )}
+        
+        {promoMessage && (
+          <motion.p
+            className="text-red-500 mt-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {promoMessage}
+          </motion.p>
+        )}
 
       {/* Лидерборд */}
       <motion.div

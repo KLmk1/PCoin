@@ -288,27 +288,6 @@ export const updateDailyUsageCount = async (userId, usageCount) => {
   await updateDoc(userRef, { dailyUsageCount: usageCount });
 };
 
-export const createPromoCode = async (promoCode, bonusAmount) => {
-  const promoRef = doc(db, "promoCodes", promoCode);
-
-  try {
-    const promoSnap = await getDoc(promoRef);
-    if (promoSnap.exists()) {
-      return { success: false, message: "Промокод уже существует!" };
-    }
-
-    await setDoc(promoRef, {
-      bonus: bonusAmount,
-      createdAt: new Date(),
-    });
-
-    return { success: true, message: `Промокод "${promoCode}" создан с бонусом ${bonusAmount}!` };
-  } catch (error) {
-    console.error("Ошибка создания промокода:", error);
-    return { success: false, message: "Ошибка при создании промокода." };
-  }
-};
-
 export const applyPromoCode = async (uid, promoCode) => {
   const promoRef = doc(db, "promoCodes", promoCode);
   const userRef = doc(db, "users", uid);
@@ -322,6 +301,12 @@ export const applyPromoCode = async (uid, promoCode) => {
 
     const promoData = promoSnap.data();
     const bonus = promoData.bonus || 0;
+    const usedBy = promoData.usedBy || []; // Массив пользователей, использовавших промокод
+
+    // Проверяем, использовал ли уже этот пользователь промокод
+    if (usedBy.includes(uid)) {
+      return { success: false, message: "Вы уже использовали этот промокод!" };
+    }
 
     // Начисляем бонус пользователю
     const userSnap = await getDoc(userRef);
@@ -332,12 +317,32 @@ export const applyPromoCode = async (uid, promoCode) => {
     const currentBalance = userSnap.data().balance || 0;
     await updateDoc(userRef, { balance: currentBalance + bonus });
 
-    // Удаляем промокод из Firestore, чтобы он больше не был доступен
-    await deleteDoc(promoRef);
+    // Добавляем пользователя в список использовавших промокод
+    usedBy.push(uid);
+    await updateDoc(promoRef, { usedBy });
+
+    // Если промокод одноразовый — удаляем его
+    if (!promoData.multiUse) {
+      await deleteDoc(promoRef);
+    }
 
     return { success: true, newBalance: currentBalance + bonus, message: `Промокод "${promoCode}" успешно активирован!` };
   } catch (error) {
     console.error("Ошибка при активации промокода:", error);
     return { success: false, message: "Ошибка сервера." };
+  }
+};
+
+export const getAdmins = async () => {
+  try {
+    const adminsRef = collection(db, "admins");
+    const querySnapshot = await getDocs(adminsRef);
+    
+    const admins = querySnapshot.docs.map(doc => doc.data().uid); // Получаем все uid администраторов
+    console.log("Администраторы:", admins);
+    return admins;
+  } catch (error) {
+    console.error("Ошибка при получении списка администраторов:", error);
+    return [];
   }
 };
